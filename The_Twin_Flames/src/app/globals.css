@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import "tailwindcss";
+
+
+:root {
+  --background: #faf8f5; /* Premium luxury cream background */
+  --foreground: #121212; /* Rich dark charcoal/black */
+  --terracotta: #b06c4d;
+  --wine: #741F27; /* Premium Wine Red */
+  --gold: #d8bf9c;
+  --gold-hover: #ecd5b9;
+}
+
+@theme {
+  --variant-dark: .dark;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Montserrat", sans-serif;
+  --color-terracotta: var(--terracotta);
+  --color-wine: var(--wine);
+  --color-gold: var(--gold);
+  --color-gold-hover: var(--gold-hover);
+  --color-luxury-black: #121212;
+  --color-luxury-cream: #faf8f5;
+  --color-luxury-gray: #71717a;
+}
+
+body {
+  background-color: var(--background)!important;
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar for premium feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #faf8f5;
+}
+::-webkit-scrollbar-thumb {
+  background: #d8bf9c;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b89047;
+}
+
+/* Hide Top Header with premium transition when drawer/toggle is open */
+.drawer-open #top-header {
+  transform: translateY(-100%);
+  opacity: 0;
+  height: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  overflow: hidden;
+  border-bottom-width: 0 !important;
+  pointer-events: none;
+}
+
