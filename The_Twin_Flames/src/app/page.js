@@ -1,4 +1,6 @@
-import HeroSection from "@/components/HeroSection";
+import Banner from "@/components/Banner";
+import Fragrance from "@/components/Fragrance";
+// import HeroSection from "@/components/HeroSection";
 import FeaturedProducts from "@/components/FeaturedProducts";
 import Collections from "@/components/Collections";
 import Testimonials from "@/components/Testimonials";
@@ -13,16 +15,20 @@ import Blog from "@/components/Blog";
 export default function Home() {
   return (
     <>
-      <HeroSection />
+      <Banner />
+      <Fragrance />
+      {/* <HeroSection /> */}
       <FeaturedProducts />
-      <Collections />
-      <Produtscollection />
       <NaturalIngredients />
+      <Produtscollection />
       <DealOfTheWeek />
+      <Collections />
+      
+       <Testimonials />
       <WhyChooseUs />
-      <Gallery />
-      <Blog />
-      <Testimonials />
+      {/* <Gallery /> */}
+      {/* <Blog /> */}
+     
       <Newsletter />
     </>
   );

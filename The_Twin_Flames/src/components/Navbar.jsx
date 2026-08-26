@@ -63,7 +63,7 @@ const leftLinks = [
     ]
   },
   {
-    name: "Collection",
+    name: "Gifts",
     href: "#",
     hasDropdown: true,
     dropdownItems: [
@@ -73,6 +73,7 @@ const leftLinks = [
       { name: "Limited Edition", href: "#" }
     ]
   }
+  
 ];
 
 // Right Side Navigation Links Config
@@ -83,7 +84,7 @@ const rightLinks = [
     hasDropdown: false
   },
   {
-    name: "Blog",
+    name: "Offers",
     href: "#",
     hasDropdown: false
   },
@@ -176,19 +177,19 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Outer Floating Wrapper */}
+      {/* Outer Floating Wrapper - Always fixed to prevent layout jumps, animates top position and scale smoothly */}
       <div
-        className={`z-50 transition-all duration-500 transform-gpu ${
+        className={`z-50 fixed left-1/2 -translate-x-1/2 w-[95%] xl:w-full xl:max-w-7xl px-4 md:px-6 transition-all duration-500 ease-in-out transform-gpu ${
           isScrolled
-            ? "fixed top-3 lg:top-[22px] xl:top-[26px] left-1/2 -translate-x-1/2 w-[95%] xl:w-full xl:max-w-7xl px-4 md:px-6"
-            : "absolute top-4 lg:top-6 xl:top-7 left-1/2 -translate-x-1/2 w-[95%] xl:w-full xl:max-w-7xl px-4 md:px-6"
+            ? "top-3 lg:top-[16px] xl:top-[20px]"
+            : "top-[54px] lg:top-[68px] xl:top-[74px]"
         }`}
       >
         <nav
-          className={`w-full transition-all duration-500 rounded-[28px] md:rounded-[36px] overflow-visible border ${
+          className={`w-full transition-all duration-500 rounded-[28px] md:rounded-[36px] overflow-visible border bg-white ${
             isScrolled
-              ? "bg-white shadow-lg border-gold/20"
-              : "bg-white shadow-sm border-gold/15"
+              ? "shadow-lg border-[#d8bf9c]/25 scale-[0.985]"
+              : "shadow-sm border-[#d8bf9c]/15 scale-100"
           }`}
         >
           {/* ========================================================================= */}
@@ -322,6 +323,7 @@ export default function Navbar() {
                     src="/images/twin_flame.jpeg"
                     alt="Twin Flame Logo"
                     fill
+                    sizes="(max-width: 1280px) 96px, 120px"
                     className="rounded-full object-cover aspect-square"
                   />
                 </Link>
@@ -422,6 +424,7 @@ export default function Navbar() {
                   src="/images/twin_flame.jpeg"
                   alt="Twin Flame"
                   fill
+                  sizes="(max-width: 375px) 32px, 36px"
                   className="rounded-full object-cover"
                 />
               </div>
@@ -599,6 +602,7 @@ export default function Navbar() {
                           src={item.image}
                           alt={item.name}
                           fill
+                          sizes="64px"
                           className="object-cover"
                         />
                       </div>
@@ -709,6 +713,7 @@ export default function Navbar() {
                       src="/images/twin_flame.jpeg"
                       alt="Twin Flame"
                       fill
+                      sizes="36px"
                       className="object-cover"
                     />
                   </div>

@@ -1,11 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
-import { ShoppingBag, Heart, Sparkles } from "lucide-react";
+import { ShoppingBag, Heart } from "lucide-react";
 
-// Mock products data using the requested FeaturedProduct paths
+// Mock products data using the requested our_products paths
 const products = [
   {
     id: 1,
@@ -13,7 +12,7 @@ const products = [
     price: 1499.0,
     rating: 5,
     tag: "Best Seller",
-    image: "/images/Product/p_1.webp"
+    image: "/images/our_products/the_flame_01.webp"
   },
   {
     id: 2,
@@ -21,7 +20,7 @@ const products = [
     price: 1899.0,
     rating: 5,
     tag: "New Arrival",
-    image: "/images/Product/p_2.webp"
+    image: "/images/our_products/the_flame_02.jpeg"
   },
   {
     id: 3,
@@ -29,7 +28,7 @@ const products = [
     price: 899.0,
     rating: 4.8,
     tag: "Trending",
-    image: "/images/Product/p_3.webp"
+    image: "/images/our_products/the_flame_03.jpeg"
   },
   {
     id: 4,
@@ -37,16 +36,15 @@ const products = [
     price: 2499.0,
     rating: 5,
     tag: "Limited Ed.",
-    image: "/images/Product/p_4.webp"
+    image: "/images/our_products/the_flame_05.jpeg"
   },
-  // Additional items to make the infinite slide even richer
   {
     id: 5,
     name: "Twin Flame Signature Candle II",
     price: 1499.0,
     rating: 5,
     tag: "Best Seller",
-    image: "/images/Product/p_1.webp"
+    image: "/images/our_products/the_flame_01.webp"
   },
   {
     id: 6,
@@ -54,7 +52,7 @@ const products = [
     price: 1899.0,
     rating: 4.9,
     tag: "New Arrival",
-    image: "/images/Product/p_2.webp"
+    image: "/images/our_products/the_flame_02.jpeg"
   }
 ];
 
@@ -71,141 +69,211 @@ const LuxuryStarIcon = ({ filled }) => (
   </svg>
 );
 
-export default function Produtscollection() {
-  // Duplicate the list once to create a seamless infinite scrolling loop
-  const loopProducts = [...products, ...products];
+// Marquee Card Component supporting 3D Parallax Tilt (Pauses marquee on hover)
+function MarqueeProductCard({ product }) {
+  const cardRef = useRef(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const card = cardRef.current;
+    const rect = card.getBoundingClientRect();
+    
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    
+    setTilt({
+      x: x * 8,
+      y: -y * 8
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setTilt({ x: 0, y: 0 });
+  };
 
   return (
-    <section className="py-24 bg-white overflow-hidden relative z-10">
-      
-      {/* 1. Header with custom leaf divider ornament */}
-      <div className="text-center space-y-3 max-w-xl mx-auto mb-16 px-4">
-        <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.25em] text-[#bfa780] flex items-center justify-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5" />
-          Aesthetic Luxury
+    <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        transform: `perspective(1000px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) scale(${isHovered ? 1.025 : 1})`,
+        transition: isHovered ? "transform 0.1s ease-out" : "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)"
+      }}
+      className="group flex flex-col relative p-4 bg-[#761e27] hover:bg-[#8c2530] rounded-[32px] border border-[#d8bf9c]/35 hover:border-[#d8bf9c] shadow-md hover:shadow-2xl transition-all duration-500 ease-out min-h-[460px] w-[240px] sm:w-[280px] flex-shrink-0 transform-gpu"
+    >
+      {/* A. Floating Tag Badge (Outside the container, positioned responsively to fit 240px width) */}
+      <div className="absolute top-5 left-5 sm:top-7 sm:left-7 z-30 bg-[#faf8f5] border border-[#d8bf9c]/35 shadow-md rounded-full px-3.5 py-1 select-none pointer-events-none transition-transform duration-300 group-hover:scale-105">
+        <span className="text-[7.5px] md:text-[8px] font-bold tracking-[0.2em] text-[#761e27] uppercase text-center">
+          {product.tag}
         </span>
-        <h2 className="font-serif text-3xl md:text-5xl font-bold tracking-tight text-luxury-black">
-          Best Selling
-        </h2>
-
       </div>
 
-      {/* 2. Infinite Scrolling Container */}
-      <div className="relative w-full overflow-hidden py-4 select-none">
+      {/* B. Arched Dome Image Container with 3px solid gold border */}
+      <div className="relative aspect-[3/4] w-full bg-white rounded-t-full rounded-b-2xl border-[3px] border-[#d8bf9c] overflow-hidden shadow-inner mb-4">
         
-        {/* Scoped CSS Styles to handle marquee infinite translation and pause on hover */}
-        <style>{`
-          @keyframes marqueeScroll {
-            0% { transform: translate3d(0, 0, 0); }
-            100% { transform: translate3d(-50%, 0, 0); }
-          }
-          .marquee-track-container {
-            display: flex;
-            gap: 2rem; /* Matches gap-8 */
-            width: max-content;
-            animation: marqueeScroll 35s linear infinite;
-          }
-          .marquee-track-container:hover {
-            animation-play-state: paused;
-          }
-        `}</style>
-        
-        {/* Left Vignette Edge Blur */}
-        <div className="absolute left-0 top-0 bottom-0 w-12 md:w-32 bg-gradient-to-r from-white via-white/80 to-transparent z-30 pointer-events-none" />
-        
-        {/* Right Vignette Edge Blur */}
-        <div className="absolute right-0 top-0 bottom-0 w-12 md:w-32 bg-gradient-to-l from-white via-white/80 to-transparent z-30 pointer-events-none" />
+        {/* Main Product Image */}
+        <div className="w-full h-full relative">
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            sizes="(max-width: 640px) 240px, 280px"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-104"
+          />
+        </div>
 
-        {/* Marquee Track: Loops from 0 to -50% */}
-        <div className="marquee-track-container px-4">
-          {loopProducts.map((product, idx) => (
-            <div
-              key={`${product.id}-${idx}`}
-              className="group flex flex-col relative w-[230px] sm:w-[270px] flex-shrink-0"
-            >
-              
-              {/* Product Card Image Container */}
-              <div className="relative aspect-square w-full bg-[#faf8f5] border border-zinc-100 overflow-visible rounded-2xl shadow-sm mb-4">
-                
-                {/* Badge: Centered, half-overlapping top border */}
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 bg-[#fdfbf7] border border-[#d8bf9c]/30 shadow-sm rounded-lg px-4.5 py-1 flex flex-col items-center justify-center min-w-[100px] select-none">
-                  {/* Golden seal coin */}
-                  <div className="absolute -top-1.5 w-3 h-3 rounded-full bg-gradient-to-br from-[#d8bf9c] via-[#ecd5b9] to-[#d8bf9c] border border-[#d8bf9c] shadow-[0_1px_3px_rgba(0,0,0,0.15)] flex items-center justify-center">
-                    <div className="w-1 h-1 rounded-full bg-white/70" />
-                  </div>
-                  <span className="text-[7.5px] md:text-[8px] font-bold tracking-[0.25em] text-[#bfa780] uppercase text-center mt-1">
-                    {product.tag}
-                  </span>
-                </div>
+        {/* Quick Action Overlay (Wishlist and Shopping Bag buttons) */}
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-3 z-20 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
+          
+          {/* Wishlist Button */}
+          <button
+            className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-md border border-zinc-200/20 shadow-md hover:bg-white text-zinc-700 hover:text-rose-600 hover:scale-105 flex items-center justify-center transition-all duration-300 cursor-pointer"
+            aria-label="Add to Wishlist"
+          >
+            <Heart className="w-4.5 h-4.5 font-light" />
+          </button>
+          
+          {/* Shopping Bag Add Button */}
+          <button
+            className="w-10 h-10 rounded-full bg-[#faf8f5] border border-[#d8bf9c]/30 shadow-md hover:bg-white text-[#761e27] hover:scale-105 flex items-center justify-center transition-all duration-300 cursor-pointer"
+            aria-label="Quick Shop"
+          >
+            <ShoppingBag className="w-4.5 h-4.5 font-light" />
+          </button>
 
-                {/* Main Product Image wrapper (Rounded) */}
-                <div className="w-full h-full rounded-2xl overflow-hidden relative">
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    sizes="(max-width: 640px) 230px, 270px"
-                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                  />
-                </div>
+        </div>
+      </div>
 
-                {/* Quick Action Overlay (Wishlist and Shopping Bag buttons, responsive visibility) */}
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-3 z-20 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
-                  
-                  {/* Wishlist Heart Button */}
-                  <button
-                    className="w-11 h-11 rounded-full bg-white/60 backdrop-blur-md border border-zinc-200/20 shadow-md hover:bg-white text-zinc-700 hover:text-rose-600 hover:scale-105 flex items-center justify-center transition-all duration-300 cursor-pointer"
-                    aria-label="Add to Wishlist"
-                  >
-                    <Heart className="w-5 h-5 font-light" />
-                  </button>
-                  
-                  {/* Glowing Shopping Bag Quick Add Button */}
-                  <button
-                    className="w-11 h-11 rounded-full bg-[#fdfbf7] border border-[#d8bf9c]/30 shadow-[0_0_12px_rgba(197,168,128,0.2)] hover:shadow-[0_0_18px_rgba(197,168,128,0.5)] hover:bg-[#d8bf9c] hover:text-white text-luxury-black hover:scale-105 flex items-center justify-center transition-all duration-300 cursor-pointer"
-                    aria-label="Quick Shop"
-                  >
-                    <ShoppingBag className="w-5 h-5 font-light" />
-                  </button>
+      {/* C. Product Details Block */}
+      <div className="space-y-2 flex-1 flex flex-col justify-between px-1">
+        <div>
+          {/* Title in Serif & Ivory White */}
+          <h3 className="font-serif text-sm md:text-base font-semibold tracking-wide text-[#faf8f5] hover:text-[#d8bf9c] cursor-pointer transition-colors duration-300 mt-1 leading-snug">
+            {product.name}
+          </h3>
+        </div>
 
-                </div>
-              </div>
+        {/* Rating + Price aligned in one row */}
+        <div className="flex items-center justify-between pt-2.5 border-t border-[#d8bf9c]/20 mt-2">
+          
+          {/* Star Rating */}
+          <div className="flex items-center gap-0.5">
+            {[...Array(5)].map((_, i) => (
+              <LuxuryStarIcon
+                key={i}
+                filled={i < Math.floor(product.rating)}
+              />
+            ))}
+            <span className="text-[11px] font-serif text-[#d8bf9c] font-bold ml-1.5">
+              {product.rating}
+            </span>
+          </div>
 
-              {/* Product Details Block */}
-              <div className="space-y-1.5 flex-1 flex flex-col justify-between px-1">
-                <div>
-                  {/* Title in Serif */}
-                  <h3 className="font-serif text-base font-medium tracking-wide text-zinc-800 hover:text-wine cursor-pointer transition-colors duration-300 mt-1 line-clamp-1">
-                    {product.name}
-                  </h3>
-                </div>
+          {/* Price Tag in Gold */}
+          <span className="font-sans text-sm md:text-[15px] font-extrabold text-[#d8bf9c]">
+            ₹{product.price.toLocaleString('en-IN')}
+          </span>
 
-                {/* Rating + Price aligned in one row (left and right) */}
-                <div className="flex items-center justify-between pt-1">
-                  
-                  {/* Custom Diamond Star Rating */}
-                  <div className="flex items-center gap-0.5">
-                    {[...Array(5)].map((_, i) => (
-                      <LuxuryStarIcon
-                        key={i}
-                        filled={i < Math.floor(product.rating)}
-                      />
-                    ))}
-                    <span className="text-[11px] font-serif text-[#a1824a] font-bold ml-1.5">
-                      {product.rating}
-                    </span>
-                  </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-                  {/* Price Tag in Indian Rupees */}
-                  <span className="font-sans text-sm md:text-[15px] font-extrabold text-luxury-black">
-                    ₹{product.price.toLocaleString('en-IN')}
-                  </span>
+export default function Produtscollection() {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef(null);
 
-                </div>
-              </div>
+  const loopProducts = [...products, ...products];
 
+  // Set up intersection observer to track when section enters and exits viewport
+  useEffect(() => {
+    if (typeof window === "undefined" || !sectionRef.current) return;
+    
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.08 }
+    );
+
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section 
+      ref={sectionRef}
+      className="py-16 md:py-20 bg-[#faf8f5] overflow-hidden relative z-10 border-t border-[#d8bf9c]/20"
+    >
+      {/* Decorative luxury red gradient glows */}
+      <div className="absolute top-[-5%] left-[-10%] w-[350px] h-[350px] rounded-full bg-[#761e27]/3 blur-[90px] pointer-events-none" />
+      <div className="absolute bottom-[-5%] right-[-10%] w-[350px] h-[350px] rounded-full bg-[#761e27]/3 blur-[90px] pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+        {/* Header Title - High-end Editorial Luxury Design (scaled fonts for mobile) */}
+        <div className="flex flex-col items-center justify-center text-center mb-10 md:mb-12 px-4">
+          {/* A. Small Brand Prefix */}
+          <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.35em] xs:tracking-[0.45em] text-[#d8bf9c] mb-2.5 leading-none">
+            CURATED COLLECTION
+          </span>
+
+          {/* B. Main Title */}
+          <h2 className="font-serif text-2xl xs:text-3xl sm:text-4xl md:text-[2.9rem] font-normal tracking-wide text-[#761e27] leading-tight">
+            Loved By Our Customers
+          </h2>
+
+          {/* C. Ornate Gold Divider */}
+          <div className="flex items-center justify-center gap-3.5 my-3 w-full">
+            <div className="h-[1px] w-14 bg-gradient-to-r from-transparent to-[#d8bf9c]/60" />
+            <div className="flex items-center gap-1.5 text-[#d8bf9c] text-[10px]">
+              <span>✦</span>
+              <span className="text-[12px] opacity-90 scale-110">✧</span>
+              <span>✦</span>
             </div>
-          ))}
+            <div className="h-[1px] w-14 bg-gradient-to-l from-transparent to-[#d8bf9c]/60" />
+          </div>
+
+          {/* D. Subtitle */}
+          <p className="font-sans text-xs sm:text-sm tracking-wide text-[#761e27]/75 font-medium max-w-xl">
+            Discover the fragrances and gifts customers keep coming back to.
+          </p>
+        </div>
+
+        {/* Infinite Scrolling Container */}
+        <div className="relative w-full overflow-hidden py-4 select-none">
+          
+          {/* Scoped CSS Styles to handle marquee infinite translation and pause on hover */}
+          <style dangerouslySetInnerHTML={{__html: `
+            @keyframes marqueeScroll {
+              0% { transform: translate3d(0, 0, 0); }
+              100% { transform: translate3d(-50%, 0, 0); }
+            }
+            .marquee-track-container {
+              display: flex;
+              gap: 2rem;
+              width: max-content;
+              animation: marqueeScroll 35s linear infinite;
+            }
+            .marquee-track-container:hover {
+              animation-play-state: paused;
+            }
+          `}} />
+          
+          {/* Marquee Track */}
+          <div className="marquee-track-container px-4">
+            {loopProducts.map((product, idx) => (
+              <MarqueeProductCard
+                key={`${product.id}-${idx}`}
+                product={product}
+              />
+            ))}
+          </div>
         </div>
       </div>
 

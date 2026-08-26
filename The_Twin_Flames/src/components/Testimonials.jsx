@@ -1,210 +1,303 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
-// Custom SVG components for verified seal and quote marks
-const CheckBadgeIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 text-[#741F27] shrink-0">
-    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2Zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9Z" />
-  </svg>
-);
-
-const QuoteWatermark = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12 text-[#741F27]/10 pointer-events-none select-none">
-    <path d="M14.017 21v-7.391c0-5.704 3.731-9.6 9.314-10.609l.996 1.951c-3.799 1.162-6.286 4.41-6.286 8.24h7v7.809h-11.025zm-14.017 0v-7.391c0-5.704 3.748-9.6 9.314-10.609l.996 1.951c-3.799 1.162-6.286 4.41-6.286 8.24h7v7.809h-11.025z" />
-  </svg>
-);
 
 const reviews = [
   {
     id: 1,
-    name: "Dianne Vance",
+    name: "Divya Iyer",
+    role: "Verified Buyer",
     rating: 5,
-    quote: "The fragrance is divine! It lasts all day long and gets me compliments everywhere. Absolutely my new signature scent.",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop"
+    quote: "The fragrance is divine! It lasts all day long and gets me compliments everywhere. Absolutely my new signature scent. Twin Flame has completely changed how I think about soy wax candles.",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=350&auto=format&fit=crop",
+    linkText: "Read Divya's Story"
   },
   {
     id: 2,
-    name: "Julian Mercer",
+    name: "Kabir Mehta",
+    role: "Verified Buyer",
     rating: 5,
-    quote: "I'm in love with the bottle, the scent, everything! Perfect balance of elegance and freshness. Highly recommend it.",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop"
+    quote: "I'm in love with the bottle, the scent, everything! Perfect balance of elegance and freshness. These are handcrafted masterperfumer notes. Highly recommend it to anyone seeking true aesthetic harmony.",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=350&auto=format&fit=crop",
+    linkText: "Read Kabir's Story"
   },
   {
     id: 3,
-    name: "Seraphina Sterling",
+    name: "Riya Sen",
+    role: "Verified Buyer",
     rating: 5,
-    quote: "Such a beautiful and unique fragrance. It's now my go-to perfume for every occasion. Truly worth it!",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop"
+    quote: "Such a beautiful and unique fragrance. It's now my go-to perfume for every occasion. Truly worth it! The double border gold presentation matches my luxury shelf perfectly.",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=350&auto=format&fit=crop",
+    linkText: "Read Riya's Story"
+  },
+  {
+    id: 4,
+    name: "Aman Sharma",
+    role: "Verified Buyer @AmanTheSign",
+    rating: 5,
+    quote: "At Twin Flame, the craftsmanship is more than fragrance, it's an absolute emotional landscape. A single candle transforms my entire living space. The 3D layout of the jar is gorgeous.",
+    avatar: "/images/our_products/the_flame_03.jpeg",
+    linkText: "Read Aman's Story"
   }
 ];
 
+const variants = {
+  enter: (direction) => ({
+    x: direction > 0 ? 150 : -150,
+    opacity: 0
+  }),
+  center: {
+    x: 0,
+    opacity: 1
+  },
+  exit: (direction) => ({
+    x: direction < 0 ? 150 : -150,
+    opacity: 0
+  })
+};
+
 export default function Testimonials() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
+  const [direction, setDirection] = useState(1); // 1 = next, -1 = prev
+  
+  const isScrollingRef = useRef(false);
+  const containerRef = useRef(null);
+  const currentIndexRef = useRef(currentIndex);
 
-  // Responsive layout tracking
+  // Sync index ref to avoid stale closures in event listener
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+    currentIndexRef.current = currentIndex;
+  }, [currentIndex]);
+
+  // Debounced wheel listener: scrolls cards 1-by-1, but unlocks scroll at boundaries to scroll the page
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e) => {
+      const activeIdx = currentIndexRef.current;
+
+      // 1. Scrolling Down (e.deltaY > 0)
+      if (e.deltaY > 0) {
+        // If we are at the last card, let the scroll pass to scroll down the page
+        if (activeIdx === reviews.length - 1) {
+          return; 
+        }
+        
+        // Otherwise, lock page scroll and slide cards
+        e.preventDefault();
+        if (isScrollingRef.current) return;
+        isScrollingRef.current = true;
+        setDirection(1);
+        setCurrentIndex((prev) => prev + 1);
+      } 
+      // 2. Scrolling Up (e.deltaY < 0)
+      else if (e.deltaY < 0) {
+        // If we are at the first card, let the scroll pass to scroll up the page
+        if (activeIdx === 0) {
+          return;
+        }
+
+        // Otherwise, lock page scroll and slide cards
+        e.preventDefault();
+        if (isScrollingRef.current) return;
+        isScrollingRef.current = true;
+        setDirection(-1);
+        setCurrentIndex((prev) => prev - 1);
+      }
+
+      // 700ms cooldown to match slide animation timings
+      setTimeout(() => {
+        isScrollingRef.current = false;
+      }, 700);
     };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+
+    container.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      if (container) {
+        container.removeEventListener("wheel", handleWheel);
+      }
+    };
   }, []);
 
-  const nextSlide = () => {
+  const handleNext = () => {
+    setDirection(1);
     setCurrentIndex((prev) => (prev + 1) % reviews.length);
   };
 
-  const prevSlide = () => {
+  const handlePrev = () => {
+    setDirection(-1);
     setCurrentIndex((prev) => (prev - 1 + reviews.length) % reviews.length);
   };
 
+  const activeReview = reviews[currentIndex];
+
   return (
-    <section className="py-24 bg-gradient-to-b from-white via-[#faf8f5] to-white relative z-10 overflow-hidden">
+    <section className="py-16 bg-gradient-to-br from-[#761e27] via-[#521319] to-[#30060a] overflow-hidden relative z-10 border-t border-[#d8bf9c]/25">
       
       {/* Background Decorative Glows */}
-      <div className="absolute top-0 left-[-10%] w-[45vw] h-[45vw] rounded-full bg-[#741F27]/3 blur-[120px] pointer-events-none select-none z-0" />
-      <div className="absolute bottom-0 right-[-10%] w-[45vw] h-[45vw] rounded-full bg-[#741F27]/3 blur-[120px] pointer-events-none select-none z-0" />
+      <div className="absolute top-0 left-[-10%] w-[45vw] h-[45vw] rounded-full bg-[#761e27]/3 blur-[120px] pointer-events-none select-none z-0" />
+      <div className="absolute bottom-0 right-[-10%] w-[45vw] h-[45vw] rounded-full bg-[#761e27]/3 blur-[120px] pointer-events-none select-none z-0" />
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
         
         {/* Header Title Section */}
-        <div className="text-center space-y-3 max-w-xl mx-auto mb-16 px-4">
-          <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.25em] text-[#741F27] flex items-center justify-center gap-1.5">
-            ★ CUSTOMER REVIEWS ★
+        <div className="flex flex-col items-center justify-center text-center mb-10 md:mb-12">
+          {/* Small Brand Prefix */}
+          <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.45em] text-[#d8bf9c] mb-3 leading-none">
+            CUSTOMER REVIEWS
           </span>
 
-          <h2 className="font-serif text-3xl md:text-5xl font-bold tracking-tight text-luxury-black leading-tight">
-            Loved By Fragrance <br />
-            <span className="text-[#741F27]">Lovers</span>
+          {/* Main Title (White on dark theme) */}
+          <h2 className="font-serif text-2xl xs:text-3xl sm:text-4xl md:text-[2.9rem] font-normal tracking-wide text-white leading-tight">
+            Loved By Fragrance <span className="italic font-serif text-[#d8bf9c] mr-1">Lovers</span>
           </h2>
           
           {/* Heart Divider */}
-          <div className="flex items-center justify-center gap-3 py-2">
-            <div className="h-[1px] w-20 bg-gradient-to-r from-transparent to-[#741F27]/30" />
-            <span className="text-[#741F27] text-xs">❤</span>
-            <div className="h-[1px] w-20 bg-gradient-to-l from-transparent to-[#741F27]/30" />
+          <div className="flex items-center justify-center gap-3.5 my-3 w-full">
+            <div className="h-[1px] w-14 bg-[#d8bf9c]/60" />
+            <div className="flex items-center gap-1.5 text-[#d8bf9c] text-[10px]">
+              <span>✦</span>
+              <span className="text-[12px] opacity-90 scale-110">✧</span>
+              <span>✦</span>
+            </div>
+            <div className="h-[1px] w-14 bg-[#d8bf9c]/60" />
           </div>
 
-          <p className="font-sans text-xs md:text-sm text-zinc-500 font-light leading-relaxed">
-            Real stories from real people who fell in love with our fragrances and made them a part of their everyday.
+          <p className="font-sans text-xs sm:text-sm tracking-wide text-zinc-300/90 font-medium max-w-xl">
+            Real stories from real people who fell in love with our fragrances and made them a part of their everyday life.
           </p>
         </div>
 
-        {/* Testimonials Slider Wrapper */}
-        <div className="relative overflow-hidden w-full py-4">
-          <motion.div
-            className="flex md:grid md:grid-cols-3 gap-8 md:gap-10 w-full"
-            animate={{
-              x: isMobile ? `calc(-${currentIndex * 100}% - ${currentIndex * 32}px)` : "0%"
-            }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          >
-            {reviews.map((rev, index) => {
-              const isHighlighted = isMobile ? index === currentIndex : true;
-              return (
-                <div
-                  key={rev.id}
-                  className={`w-full shrink-0 md:shrink md:w-auto bg-white rounded-[2.5rem] p-8 md:p-10 border transition-all duration-500 flex flex-col justify-between ${
-                    isHighlighted
-                      ? "border-[#741F27]/20 shadow-[0_15px_40px_rgba(116,31,39,0.04)] scale-[1.01]"
-                      : "border-zinc-200/40 shadow-[0_10px_35px_rgba(0,0,0,0.015)] opacity-50"
-                  }`}
-                >
-                  <div className="space-y-6 relative">
-                    
-                    {/* Quotation mark in top right */}
-                    <div className="absolute top-0 right-0">
-                      <QuoteWatermark />
-                    </div>
+        {/* Viewport container wrapping the active sliding card */}
+        <div 
+          ref={containerRef}
+          className="relative max-w-4xl mx-auto px-0 md:px-12 min-h-[420px] md:min-h-[300px] flex items-center justify-center select-none"
+        >
+          <AnimatePresence mode="wait" custom={direction}>
+            <motion.div
+              key={activeReview.id}
+              custom={direction}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.5, ease: "easeInOut" }}
+              className="relative w-full bg-white rounded-[32px] border border-[#d8bf9c]/35 shadow-[0_15px_40px_rgba(0,0,0,0.04)] p-8 pt-16 md:pt-10 md:pl-[310px] md:pr-14 md:py-12 min-h-[330px] md:min-h-[270px] flex flex-col justify-center items-start transform-gpu"
+            >
+              {/* 1. Inset Double Border Frame */}
+              <div className="absolute inset-3.5 border border-[#d8bf9c]/20 rounded-[20px] pointer-events-none z-0" />
 
-                    {/* Wine-red Rating Stars */}
-                    <div className="flex items-center gap-0.5">
-                      {[...Array(rev.rating)].map((_, i) => (
-                        <Star key={i} className="w-3.5 h-3.5 text-[#741F27] fill-[#741F27]" />
-                      ))}
-                    </div>
+              {/* 2. Offset Floating Card Image (screenshot look: hangs left on desktop, top-centered on mobile) */}
+              <div className="absolute -top-14 left-1/2 -translate-x-1/2 md:translate-x-0 md:top-1/2 md:-translate-y-1/2 md:-left-12 w-28 h-28 md:w-[260px] md:h-[260px] rounded-full md:rounded-[24px] overflow-hidden shadow-2xl border-2 border-[#d8bf9c] z-10 bg-[#faf8f5] transition-transform duration-500 hover:scale-[1.02]">
+                <Image
+                  src={activeReview.avatar}
+                  alt={`${activeReview.name} Portrait`}
+                  fill
+                  sizes="(max-width: 768px) 112px, 260px"
+                  className="object-cover"
+                  priority
+                />
+              </div>
 
-                    {/* Review text */}
-                    <p className="font-sans text-xs md:text-[13.5px] text-zinc-700 font-light leading-relaxed pr-8">
-                      {rev.quote}
-                    </p>
-
-                  </div>
-
-                  {/* Reviewer details at bottom */}
-                  <div className="pt-6 border-t border-zinc-100 mt-8 flex items-center gap-4">
-                    
-                    {/* Double-ring portrait image container */}
-                    <div className="relative w-12 h-12 rounded-full p-0.5 border border-[#741F27]/20 bg-[#faf8f5]">
-                      <div className="relative w-full h-full rounded-full overflow-hidden border border-[#d8bf9c]/60">
-                        <Image
-                          src={rev.avatar}
-                          alt={`${rev.name} Portrait`}
-                          fill
-                          sizes="48px"
-                          className="object-cover"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-0.5">
-                      <h4 className="font-serif text-sm font-bold text-luxury-black">
-                        {rev.name}
-                      </h4>
-                      <div className="flex items-center gap-1">
-                        <span className="text-[9px] tracking-[0.2em] text-[#741F27] uppercase font-extrabold leading-none">
-                          Verified Buyer
-                        </span>
-                        <CheckBadgeIcon />
-                      </div>
-                    </div>
-
-                  </div>
-
+              {/* 3. Right Side: Card details */}
+              <div className="w-full space-y-4 md:space-y-5 text-center md:text-left relative z-10 pl-0">
+                
+                {/* Quotation watermark icon */}
+                <div className="absolute top-0 right-0 opacity-15 text-[#761e27] hidden md:block">
+                  <Quote className="w-12 h-12" />
                 </div>
-              );
-            })}
-          </motion.div>
+
+                {/* Subtitle Role details */}
+                <div className="space-y-1">
+                  <span className="text-[10px] md:text-xs font-bold tracking-[0.2em] text-[#d8bf9c] uppercase block">
+                    {activeReview.role}
+                  </span>
+                  <h3 className="font-serif text-xl md:text-2xl font-bold text-[#761e27] leading-none">
+                    {activeReview.name}
+                  </h3>
+                </div>
+
+                {/* Star rating row */}
+                <div className="flex items-center justify-center md:justify-start gap-1">
+                  {[...Array(activeReview.rating)].map((_, i) => (
+                    <Star key={i} className="w-3.5 h-3.5 text-[#d8bf9c] fill-[#d8bf9c]" />
+                  ))}
+                </div>
+
+                {/* Quote description */}
+                <p className="font-sans text-xs md:text-[13.5px] text-[#761e27]/85 font-light leading-relaxed pr-0 md:pr-10">
+                  "{activeReview.quote}"
+                </p>
+
+                {/* Wine-Red Pill Action Button (similar to More on LinkedIn button in screenshot) */}
+                <div className="pt-2 flex justify-center md:justify-start">
+                  <button className="px-6 py-2.5 bg-[#761e27] hover:bg-[#8c2530] text-[#faf8f5] hover:text-[#d8bf9c] font-sans text-[10px] md:text-[11px] font-bold uppercase tracking-[0.2em] rounded-full shadow-md hover:scale-103 transition-all duration-300 cursor-pointer">
+                    {activeReview.linkText}
+                  </button>
+                </div>
+
+              </div>
+
+              {/* 4. Vertical Slide Dash Indicators (right side of card) */}
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex-col gap-1.5 hidden md:flex z-20 select-none">
+                {reviews.map((_, idx) => (
+                  <div
+                    key={idx}
+                    className={`w-[3px] transition-all duration-300 rounded-full ${
+                      idx === currentIndex ? "h-6 bg-[#761e27]" : "h-2.5 bg-zinc-200"
+                    }`}
+                  />
+                ))}
+              </div>
+
+            </motion.div>
+          </AnimatePresence>
         </div>
 
-        {/* Carousel Slider Controls */}
-        <div className="flex items-center justify-center gap-6 mt-12">
+        {/* Swipe/Scroll Help Label */}
+        <div className="flex items-center justify-center gap-1.5 text-zinc-400/80 text-[9px] md:text-[10px] font-bold tracking-[0.25em] uppercase select-none mt-4">
+          <span>SCROLL MOUSEWHEEL OR SWIPE TO SLIDE</span>
+        </div>
+
+        {/* Slider Action Arrow Buttons below the card wrapper */}
+        <div className="flex items-center justify-center gap-5 mt-6">
           
-          {/* Left Arrow Button */}
+          {/* Left Arrow button */}
           <button
-            onClick={prevSlide}
-            className="w-10 h-10 rounded-full border border-[#741F27]/25 flex items-center justify-center text-[#741F27] hover:bg-[#741F27]/5 hover:border-[#741F27]/50 transition-all duration-300 cursor-pointer"
+            onClick={handlePrev}
+            className="w-11 h-11 rounded-full border border-[#d8bf9c]/35 flex items-center justify-center text-white bg-transparent hover:bg-[#d8bf9c] hover:text-[#761e27] transition-all duration-300 cursor-pointer active:scale-95 shadow-sm"
             aria-label="Previous slide"
           >
             <ChevronLeft className="w-5 h-5 stroke-[1.5]" />
           </button>
 
-          {/* Pagination dots */}
-          <div className="flex items-center gap-2">
+          {/* Page Dots Indicator */}
+          <div className="flex items-center gap-2.5">
             {reviews.map((_, idx) => (
               <button
                 key={idx}
-                onClick={() => setCurrentIndex(idx)}
+                onClick={() => {
+                  setDirection(idx > currentIndex ? 1 : -1);
+                  setCurrentIndex(idx);
+                }}
                 className={`transition-all duration-300 rounded-full ${
                   idx === currentIndex
-                    ? "w-4 h-2 bg-[#741F27]"
-                    : "w-2 h-2 bg-[#741F27]/25 hover:bg-[#741F27]/40"
+                    ? "w-5 h-2 bg-[#d8bf9c]"
+                    : "w-2 h-2 bg-white/20 hover:bg-[#d8bf9c]"
                 }`}
                 aria-label={`Go to slide ${idx + 1}`}
               />
             ))}
           </div>
 
-          {/* Right Arrow Button */}
+          {/* Right Arrow button */}
           <button
-            onClick={nextSlide}
-            className="w-10 h-10 rounded-full border border-[#741F27]/25 flex items-center justify-center text-[#741F27] hover:bg-[#741F27]/5 hover:border-[#741F27]/50 transition-all duration-300 cursor-pointer"
+            onClick={handleNext}
+            className="w-11 h-11 rounded-full border border-[#d8bf9c]/35 flex items-center justify-center text-white bg-transparent hover:bg-[#d8bf9c] hover:text-[#761e27] transition-all duration-300 cursor-pointer active:scale-95 shadow-sm"
             aria-label="Next slide"
           >
             <ChevronRight className="w-5 h-5 stroke-[1.5]" />
@@ -216,4 +309,3 @@ export default function Testimonials() {
     </section>
   );
 }
-
