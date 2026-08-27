@@ -90,7 +90,7 @@ const rightLinks = [
   },
   {
     name: "Contact",
-    href: "#",
+    href: "/contactus",
     hasDropdown: false
   }
 ];
