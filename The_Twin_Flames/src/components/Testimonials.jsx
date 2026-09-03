@@ -1,307 +1,329 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  Star,
+  ChevronLeft,
+  ChevronRight,
+  ShoppingBag,
+  MapPin,
+  Clock,
+  Flower2,
+  Sparkles,
+  Flame,
+  Leaf,
+  CheckCircle2,
+  ShieldCheck,
+} from "lucide-react";
 
+// Curated authentic reviews
 const reviews = [
   {
     id: 1,
-    name: "Divya Iyer",
-    role: "Verified Buyer",
+    name: "Riya Sen",
+    city: "Bengaluru",
+    product: "Kashmiri Rose & Golden Nectar",
     rating: 5,
-    quote: "The fragrance is divine! It lasts all day long and gets me compliments everywhere. Absolutely my new signature scent. Twin Flame has completely changed how I think about soy wax candles.",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=350&auto=format&fit=crop",
-    linkText: "Read Divya's Story"
+    tag: "FLORAL ESSENCE",
+    tagIcon: "flower",
+    tagStyle: "bg-[#fcf6ee] text-[#8e6c3e] border-[#ebd6be]",
+    bagColor: "bg-[#8e6c3e]/12 text-[#8e6c3e]",
+    quote:
+      "Sublime, authentic floral aroma that never feels synthetic. The gold-embossed packaging felt like receiving a bespoke gift from Paris. Absolutely my new everyday sacred ritual.",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=350&auto=format&fit=crop",
+    date: "1 week ago",
   },
   {
     id: 2,
-    name: "Kabir Mehta",
-    role: "Verified Buyer",
+    name: "Aman Sharma",
+    city: "Jaipur",
+    product: "French Lavender & Velvet Fig",
     rating: 5,
-    quote: "I'm in love with the bottle, the scent, everything! Perfect balance of elegance and freshness. These are handcrafted masterperfumer notes. Highly recommend it to anyone seeking true aesthetic harmony.",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=350&auto=format&fit=crop",
-    linkText: "Read Kabir's Story"
+    tag: "AROMATHERAPY",
+    tagIcon: "sparkles",
+    tagStyle: "bg-[#f8f3fa] text-[#6d4b82] border-[#e5d8ee]",
+    bagColor: "bg-[#6d4b82]/12 text-[#6d4b82]",
+    quote:
+      "More than just candle scent—it is an absolute emotional mood. One single candle elevates the complete aesthetic aura of my home studio. Soot-free and incredibly long-lasting burn.",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=350&auto=format&fit=crop",
+    date: "2 weeks ago",
   },
   {
     id: 3,
-    name: "Riya Sen",
-    role: "Verified Buyer",
+    name: "Divya Iyer",
+    city: "Mumbai",
+    product: "Midnight Oud & Smoked Vanilla",
     rating: 5,
-    quote: "Such a beautiful and unique fragrance. It's now my go-to perfume for every occasion. Truly worth it! The double border gold presentation matches my luxury shelf perfectly.",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=350&auto=format&fit=crop",
-    linkText: "Read Riya's Story"
+    tag: "SIGNATURE BLEND",
+    tagIcon: "flame",
+    tagStyle: "bg-[#fbf4ed] text-[#8a532b] border-[#eddcca]",
+    bagColor: "bg-[#8a532b]/12 text-[#8a532b]",
+    quote:
+      "The fragrance fills my entire living space within minutes. The crackling wooden wick adds such a calming fireplace ambiance to my evenings. Redefined luxury home aromatics.",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=350&auto=format&fit=crop",
+    date: "2 days ago",
   },
   {
     id: 4,
-    name: "Aman Sharma",
-    role: "Verified Buyer @AmanTheSign",
+    name: "Kabir Mehta",
+    city: "New Delhi",
+    product: "Imperial Spiced Vetiver & Bergamot",
     rating: 5,
-    quote: "At Twin Flame, the craftsmanship is more than fragrance, it's an absolute emotional landscape. A single candle transforms my entire living space. The 3D layout of the jar is gorgeous.",
-    avatar: "/images/our_products/the_flame_03.jpeg",
-    linkText: "Read Aman's Story"
-  }
-];
-
-const variants = {
-  enter: (direction) => ({
-    x: direction > 0 ? 150 : -150,
-    opacity: 0
-  }),
-  center: {
-    x: 0,
-    opacity: 1
+    tag: "LIMITED EDITION",
+    tagIcon: "sparkles",
+    tagStyle: "bg-[#fcf4f4] text-[#761e27] border-[#f2dada]",
+    bagColor: "bg-[#761e27]/12 text-[#761e27]",
+    quote:
+      "Truly masterperfumer quality. The heavy artisan glass jar and amber glow transform my room into pure meditative sanctuary. The warm vetiver notes linger gently for hours after extinguishing.",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=350&auto=format&fit=crop",
+    date: "5 days ago",
   },
-  exit: (direction) => ({
-    x: direction < 0 ? 150 : -150,
-    opacity: 0
-  })
-};
+  {
+    id: 5,
+    name: "Ananya Roy",
+    city: "Kolkata",
+    product: "Velvet Vanilla & Smoked Bourbon",
+    rating: 5,
+    tag: "COZY EVENING",
+    tagIcon: "flame",
+    tagStyle: "bg-[#fcf8ee] text-[#916b2a] border-[#eedfc0]",
+    bagColor: "bg-[#916b2a]/12 text-[#916b2a]",
+    quote:
+      "Clean burning with zero black soot and so soothing. You can immediately tell they use 100% natural plant wax and authentic essential oils. A true five-star sensory indulgence.",
+    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=350&auto=format&fit=crop",
+    date: "3 weeks ago",
+  },
+  {
+    id: 6,
+    name: "Vikram Malhotra",
+    city: "Hyderabad",
+    product: "Gilded Sandalwood & Cardamom",
+    rating: 5,
+    tag: "SACRED HERITAGE",
+    tagIcon: "leaf",
+    tagStyle: "bg-[#f5f8f3] text-[#3e6840] border-[#d7e5d5]",
+    bagColor: "bg-[#3e6840]/12 text-[#3e6840]",
+    quote:
+      "The authentic Mysore sandalwood aroma brings immediate peace and grounding to my meditation space. The double wick burn is exceptionally even and beautiful.",
+    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=350&auto=format&fit=crop",
+    date: "1 month ago",
+  },
+];
 
 export default function Testimonials() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState(1); // 1 = next, -1 = prev
-  
-  const isScrollingRef = useRef(false);
-  const containerRef = useRef(null);
-  const currentIndexRef = useRef(currentIndex);
+  const [itemsPerPage, setItemsPerPage] = useState(2);
+  const [isHovered, setIsHovered] = useState(false);
 
-  // Sync index ref to avoid stale closures in event listener
+  // Responsive: exactly 2 cards on desktop/tablet (>=768px), 1 on mobile
   useEffect(() => {
-    currentIndexRef.current = currentIndex;
-  }, [currentIndex]);
-
-  // Debounced wheel listener: scrolls cards 1-by-1, but unlocks scroll at boundaries to scroll the page
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleWheel = (e) => {
-      const activeIdx = currentIndexRef.current;
-
-      // 1. Scrolling Down (e.deltaY > 0)
-      if (e.deltaY > 0) {
-        // If we are at the last card, let the scroll pass to scroll down the page
-        if (activeIdx === reviews.length - 1) {
-          return; 
-        }
-        
-        // Otherwise, lock page scroll and slide cards
-        e.preventDefault();
-        if (isScrollingRef.current) return;
-        isScrollingRef.current = true;
-        setDirection(1);
-        setCurrentIndex((prev) => prev + 1);
-      } 
-      // 2. Scrolling Up (e.deltaY < 0)
-      else if (e.deltaY < 0) {
-        // If we are at the first card, let the scroll pass to scroll up the page
-        if (activeIdx === 0) {
-          return;
-        }
-
-        // Otherwise, lock page scroll and slide cards
-        e.preventDefault();
-        if (isScrollingRef.current) return;
-        isScrollingRef.current = true;
-        setDirection(-1);
-        setCurrentIndex((prev) => prev - 1);
-      }
-
-      // 700ms cooldown to match slide animation timings
-      setTimeout(() => {
-        isScrollingRef.current = false;
-      }, 700);
-    };
-
-    container.addEventListener("wheel", handleWheel, { passive: false });
-    return () => {
-      if (container) {
-        container.removeEventListener("wheel", handleWheel);
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setItemsPerPage(1);
+      } else {
+        setItemsPerPage(2);
       }
     };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleNext = () => {
-    setDirection(1);
-    setCurrentIndex((prev) => (prev + 1) % reviews.length);
-  };
+  const maxIndex = Math.max(0, reviews.length - itemsPerPage);
+
+  // Auto-slide every 5.5 seconds (paused when hovered)
+  useEffect(() => {
+    if (isHovered) return;
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+    }, 5500);
+    return () => clearInterval(timer);
+  }, [isHovered, maxIndex]);
 
   const handlePrev = () => {
-    setDirection(-1);
-    setCurrentIndex((prev) => (prev - 1 + reviews.length) % reviews.length);
+    setCurrentIndex((prev) => (prev === 0 ? maxIndex : prev - 1));
   };
 
-  const activeReview = reviews[currentIndex];
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+  };
 
   return (
-    <section className="py-16 bg-gradient-to-br from-[#761e27] via-[#521319] to-[#30060a] overflow-hidden relative z-10 border-t border-[#d8bf9c]/25">
-      
-      {/* Background Decorative Glows */}
-      <div className="absolute top-0 left-[-10%] w-[45vw] h-[45vw] rounded-full bg-[#761e27]/3 blur-[120px] pointer-events-none select-none z-0" />
-      <div className="absolute bottom-0 right-[-10%] w-[45vw] h-[45vw] rounded-full bg-[#761e27]/3 blur-[120px] pointer-events-none select-none z-0" />
+    <section className="py-16 sm:py-20 md:py-24 bg-white text-[#121212] select-none relative overflow-hidden border-b border-[#ebdcd0]">
+      {/* Radiant ambient luxury background glows */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#faf6f0] rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[550px] h-[550px] bg-[#f7ede4] rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-10 relative z-10">
         
-        {/* Header Title Section */}
-        <div className="flex flex-col items-center justify-center text-center mb-10 md:mb-12">
-          {/* Small Brand Prefix */}
-          <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.45em] text-[#d8bf9c] mb-3 leading-none">
-            CUSTOMER REVIEWS
-          </span>
-
-          {/* Main Title (White on dark theme) */}
-          <h2 className="font-serif text-2xl xs:text-3xl sm:text-4xl md:text-[2.9rem] font-normal tracking-wide text-white leading-tight">
-            Loved By Fragrance <span className="italic font-serif text-[#d8bf9c] mr-1">Lovers</span>
+        {/* ========================================================================= */}
+        {/* SECTION HEADER                                                            */}
+        {/* ========================================================================= */}
+        <div className="flex flex-col items-center text-center mb-8 sm:mb-12">
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-normal text-[#181112] tracking-tight leading-tight">
+            Loved by Fragrance <span className="font-serif text-[#761e27]">Connoisseurs</span>
           </h2>
-          
-          {/* Heart Divider */}
-          <div className="flex items-center justify-center gap-3.5 my-3 w-full">
-            <div className="h-[1px] w-14 bg-[#d8bf9c]/60" />
-            <div className="flex items-center gap-1.5 text-[#d8bf9c] text-[10px]">
-              <span>✦</span>
-              <span className="text-[12px] opacity-90 scale-110">✧</span>
-              <span>✦</span>
-            </div>
-            <div className="h-[1px] w-14 bg-[#d8bf9c]/60" />
+
+          {/* Ornate Gold Accent */}
+          <div className="flex items-center justify-center gap-3 my-3">
+            <div className="h-[1.5px] w-12 bg-gradient-to-r from-transparent to-[#b8986c]" />
+            <span className="text-[#b8986c] text-[12px]">❖</span>
+            <div className="h-[1.5px] w-12 bg-gradient-to-l from-transparent to-[#b8986c]" />
           </div>
 
-          <p className="font-sans text-xs sm:text-sm tracking-wide text-zinc-300/90 font-medium max-w-xl">
-            Real stories from real people who fell in love with our fragrances and made them a part of their everyday life.
+          <p className="font-sans text-xs sm:text-[13.5px] text-zinc-500 max-w-xl font-normal tracking-wide leading-relaxed">
+            Real impressions from patrons across India who welcomed our master-blended home aromatics and crackling wooden wicks into their sanctuaries.
           </p>
         </div>
 
-        {/* Viewport container wrapping the active sliding card */}
-        <div 
-          ref={containerRef}
-          className="relative max-w-4xl mx-auto px-0 md:px-12 min-h-[420px] md:min-h-[300px] flex items-center justify-center select-none"
+        {/* ========================================================================= */}
+        {/* 2-CARD LANDSCAPE LUXURY CAROUSEL (Spacious, Clean Design)                 */}
+        {/* ========================================================================= */}
+        <div
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          className="relative px-2 sm:px-4 lg:px-6"
         >
-          <AnimatePresence mode="wait" custom={direction}>
-            <motion.div
-              key={activeReview.id}
-              custom={direction}
-              variants={variants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ duration: 0.5, ease: "easeInOut" }}
-              className="relative w-full bg-white rounded-[32px] border border-[#d8bf9c]/35 shadow-[0_15px_40px_rgba(0,0,0,0.04)] p-8 pt-16 md:pt-10 md:pl-[310px] md:pr-14 md:py-12 min-h-[330px] md:min-h-[270px] flex flex-col justify-center items-start transform-gpu"
-            >
-              {/* 1. Inset Double Border Frame */}
-              <div className="absolute inset-3.5 border border-[#d8bf9c]/20 rounded-[20px] pointer-events-none z-0" />
-
-              {/* 2. Offset Floating Card Image (screenshot look: hangs left on desktop, top-centered on mobile) */}
-              <div className="absolute -top-14 left-1/2 -translate-x-1/2 md:translate-x-0 md:top-1/2 md:-translate-y-1/2 md:-left-12 w-28 h-28 md:w-[260px] md:h-[260px] rounded-full md:rounded-[24px] overflow-hidden shadow-2xl border-2 border-[#d8bf9c] z-10 bg-[#faf8f5] transition-transform duration-500 hover:scale-[1.02]">
-                <Image
-                  src={activeReview.avatar}
-                  alt={`${activeReview.name} Portrait`}
-                  fill
-                  sizes="(max-width: 768px) 112px, 260px"
-                  className="object-cover"
-                  priority
-                />
-              </div>
-
-              {/* 3. Right Side: Card details */}
-              <div className="w-full space-y-4 md:space-y-5 text-center md:text-left relative z-10 pl-0">
-                
-                {/* Quotation watermark icon */}
-                <div className="absolute top-0 right-0 opacity-15 text-[#761e27] hidden md:block">
-                  <Quote className="w-12 h-12" />
-                </div>
-
-                {/* Subtitle Role details */}
-                <div className="space-y-1">
-                  <span className="text-[10px] md:text-xs font-bold tracking-[0.2em] text-[#d8bf9c] uppercase block">
-                    {activeReview.role}
-                  </span>
-                  <h3 className="font-serif text-xl md:text-2xl font-bold text-[#761e27] leading-none">
-                    {activeReview.name}
-                  </h3>
-                </div>
-
-                {/* Star rating row */}
-                <div className="flex items-center justify-center md:justify-start gap-1">
-                  {[...Array(activeReview.rating)].map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5 text-[#d8bf9c] fill-[#d8bf9c]" />
-                  ))}
-                </div>
-
-                {/* Quote description */}
-                <p className="font-sans text-xs md:text-[13.5px] text-[#761e27]/85 font-light leading-relaxed pr-0 md:pr-10">
-                  "{activeReview.quote}"
-                </p>
-
-                {/* Wine-Red Pill Action Button (similar to More on LinkedIn button in screenshot) */}
-                <div className="pt-2 flex justify-center md:justify-start">
-                  <button className="px-6 py-2.5 bg-[#761e27] hover:bg-[#8c2530] text-[#faf8f5] hover:text-[#d8bf9c] font-sans text-[10px] md:text-[11px] font-bold uppercase tracking-[0.2em] rounded-full shadow-md hover:scale-103 transition-all duration-300 cursor-pointer">
-                    {activeReview.linkText}
-                  </button>
-                </div>
-
-              </div>
-
-              {/* 4. Vertical Slide Dash Indicators (right side of card) */}
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex-col gap-1.5 hidden md:flex z-20 select-none">
-                {reviews.map((_, idx) => (
-                  <div
-                    key={idx}
-                    className={`w-[3px] transition-all duration-300 rounded-full ${
-                      idx === currentIndex ? "h-6 bg-[#761e27]" : "h-2.5 bg-zinc-200"
-                    }`}
-                  />
-                ))}
-              </div>
-
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        {/* Swipe/Scroll Help Label */}
-        <div className="flex items-center justify-center gap-1.5 text-zinc-400/80 text-[9px] md:text-[10px] font-bold tracking-[0.25em] uppercase select-none mt-4">
-          <span>SCROLL MOUSEWHEEL OR SWIPE TO SLIDE</span>
-        </div>
-
-        {/* Slider Action Arrow Buttons below the card wrapper */}
-        <div className="flex items-center justify-center gap-5 mt-6">
-          
-          {/* Left Arrow button */}
+          {/* Left Arrow Button */}
           <button
             onClick={handlePrev}
-            className="w-11 h-11 rounded-full border border-[#d8bf9c]/35 flex items-center justify-center text-white bg-transparent hover:bg-[#d8bf9c] hover:text-[#761e27] transition-all duration-300 cursor-pointer active:scale-95 shadow-sm"
-            aria-label="Previous slide"
+            aria-label="Previous Reviews"
+            className="absolute -left-2 sm:-left-3 lg:-left-5 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/95 backdrop-blur-xs text-zinc-700 border border-[#e6dad0] shadow-[0_4px_25px_rgba(0,0,0,0.08)] flex items-center justify-center transition-all duration-300 cursor-pointer hover:bg-[#761e27] hover:text-white hover:border-[#761e27] hover:scale-105"
           >
-            <ChevronLeft className="w-5 h-5 stroke-[1.5]" />
+            <ChevronLeft className="w-5 h-5" />
           </button>
 
-          {/* Page Dots Indicator */}
-          <div className="flex items-center gap-2.5">
-            {reviews.map((_, idx) => (
+          {/* Right Arrow Button */}
+          <button
+            onClick={handleNext}
+            aria-label="Next Reviews"
+            className="absolute -right-2 sm:-right-3 lg:-right-5 top-1/2 -translate-y-1/2 z-30 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/95 backdrop-blur-xs text-zinc-700 border border-[#e6dad0] shadow-[0_4px_25px_rgba(0,0,0,0.08)] flex items-center justify-center transition-all duration-300 cursor-pointer hover:bg-[#761e27] hover:text-white hover:border-[#761e27] hover:scale-105"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+
+          {/* Carousel Track */}
+          <div className="overflow-hidden py-3">
+            <div
+              className="flex transition-transform duration-700 ease-out"
+              style={{
+                transform: `translateX(-${currentIndex * (100 / itemsPerPage)}%)`,
+              }}
+            >
+              {reviews.map((rev) => (
+                <div
+                  key={rev.id}
+                  style={{ width: `${100 / itemsPerPage}%` }}
+                  className="shrink-0 px-2.5 sm:px-3.5"
+                >
+                  {/* Subtle Light Luxury Gradient Card with Soft #761e27 Tint */}
+                  <div className="h-full bg-gradient-to-br from-white via-[#fdf9f6] to-[#faeee9] rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-[#ebdcd0] hover:border-[#b8986c] shadow-[0_4px_20px_rgba(118,30,39,0.04)] hover:shadow-[0_12px_32px_rgba(118,30,39,0.09)] transition-all duration-500 relative overflow-hidden flex flex-col justify-between group/card">
+                    
+                    {/* Subtle Soft Ambient Glow Inside Card */}
+                    <div className="absolute -top-10 -right-10 w-44 h-44 bg-[#761e27]/4 rounded-full blur-2xl pointer-events-none group-hover/card:scale-125 transition-transform duration-700" />
+                    <div className="absolute -bottom-10 -left-10 w-44 h-44 bg-[#d8bf9c]/15 rounded-full blur-2xl pointer-events-none" />
+
+                    <div>
+                      {/* Top Header Row: 5 Gold Stars with 5.0 Rating + Category Capsule */}
+                      <div className="flex items-center justify-between gap-2 mb-2 relative z-10">
+                        <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-0.5 text-amber-500">
+                            {[...Array(rev.rating)].map((_, i) => (
+                              <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                            ))}
+                          </div>
+                          <span className="font-sans text-[11px] font-bold text-zinc-800 ml-1">
+                            5.0
+                          </span>
+                        </div>
+
+                        {/* Category Tag Pill */}
+                        <div
+                          className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/90 border border-[#ecd5cb] shadow-2xs text-[9.5px] sm:text-[10px] font-bold tracking-wider uppercase font-sans text-[#761e27]"
+                        >
+                          {rev.tagIcon === "flower" && <Flower2 className="w-3 h-3 text-[#b8986c]" />}
+                          {rev.tagIcon === "sparkles" && <Sparkles className="w-3 h-3 text-[#b8986c]" />}
+                          {rev.tagIcon === "flame" && <Flame className="w-3 h-3 text-[#b8986c]" />}
+                          {rev.tagIcon === "leaf" && <Leaf className="w-3 h-3 text-[#b8986c]" />}
+                          <span>{rev.tag}</span>
+                        </div>
+                      </div>
+
+                      {/* Purchased Product Line */}
+                      <div className="flex items-center gap-1.5 mb-2 pb-2 border-b border-[#f0ded4] relative z-10">
+                        <span className="w-4 h-4 rounded-full bg-[#761e27]/10 flex items-center justify-center shrink-0 text-[#761e27]">
+                          <ShoppingBag className="w-2.5 h-2.5" />
+                        </span>
+                        <p className="font-sans text-xs text-zinc-600 truncate">
+                          Purchased: <strong className="text-[#761e27] font-semibold ml-0.5">{rev.product}</strong>
+                        </p>
+                      </div>
+
+                      {/* Compact Full-Width Quote Section */}
+                      <div className="relative z-10 my-1">
+                        <span className="font-serif text-2xl text-[#d8bf9c] leading-none select-none block -mb-1">
+                          “
+                        </span>
+                        <p className="font-serif not-italic text-[13px] sm:text-[14px] text-[#241c1d] leading-snug sm:leading-relaxed font-normal line-clamp-3">
+                          {rev.quote}
+                        </p>
+                        <span className="font-serif text-2xl text-[#d8bf9c] leading-none select-none block text-right -mt-1">
+                          ”
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Bottom Reviewer Bio Row */}
+                    <div className="pt-2.5 mt-2.5 border-t border-[#f0ded4] flex items-center justify-between relative z-10">
+                      <div className="flex items-center gap-2.5">
+                        <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-[#b8986c] shadow-xs shrink-0">
+                          <Image
+                            src={rev.avatar}
+                            alt={rev.name}
+                            fill
+                            sizes="40px"
+                            className="object-cover"
+                          />
+                        </div>
+                        <div>
+                          <h4 className="font-serif text-sm font-bold text-[#761e27] leading-tight">
+                            {rev.name}
+                          </h4>
+                          <div className="flex items-center gap-1 text-[10.5px] text-zinc-500 font-sans mt-0.5">
+                            <MapPin className="w-3 h-3 text-[#b8986c] shrink-0" />
+                            <span>{rev.city}, India</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1 text-[10.5px] text-zinc-400 font-sans">
+                        <Clock className="w-3 h-3 text-zinc-400 shrink-0" />
+                        <span>{rev.date}</span>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Luxury Indicator Pagination Dots */}
+          <div className="flex justify-center items-center gap-2 mt-6">
+            {Array.from({ length: maxIndex + 1 }).map((_, idx) => (
               <button
                 key={idx}
-                onClick={() => {
-                  setDirection(idx > currentIndex ? 1 : -1);
-                  setCurrentIndex(idx);
-                }}
-                className={`transition-all duration-300 rounded-full ${
+                onClick={() => setCurrentIndex(idx)}
+                className={`transition-all duration-300 rounded-full cursor-pointer ${
                   idx === currentIndex
-                    ? "w-5 h-2 bg-[#d8bf9c]"
-                    : "w-2 h-2 bg-white/20 hover:bg-[#d8bf9c]"
+                    ? "w-8 h-2 bg-[#761e27]"
+                    : "w-2 h-2 bg-[#ebdcd0] hover:bg-[#b8986c]"
                 }`}
                 aria-label={`Go to slide ${idx + 1}`}
               />
             ))}
           </div>
-
-          {/* Right Arrow button */}
-          <button
-            onClick={handleNext}
-            className="w-11 h-11 rounded-full border border-[#d8bf9c]/35 flex items-center justify-center text-white bg-transparent hover:bg-[#d8bf9c] hover:text-[#761e27] transition-all duration-300 cursor-pointer active:scale-95 shadow-sm"
-            aria-label="Next slide"
-          >
-            <ChevronRight className="w-5 h-5 stroke-[1.5]" />
-          </button>
 
         </div>
 
@@ -309,3 +331,7 @@ export default function Testimonials() {
     </section>
   );
 }
+
+
+
+

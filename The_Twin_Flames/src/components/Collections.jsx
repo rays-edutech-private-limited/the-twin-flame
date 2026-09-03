@@ -1,572 +1,458 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
-import { ArrowUpRight, X, Leaf, Heart, ShieldCheck, ArrowRight, RotateCw } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  Play,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+} from "lucide-react";
 
-// Custom SVGs for card icons
-const DiffuserIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
-    <path d="M7 14c0-2.8 2.2-5 5-5s5 2.2 5 5v4c0 1.1-.9 2-2 2H9c-1.1 0-2-.9-2-2v-4Z" />
-    <path d="M10 9V7h4v2" />
-    <path d="M12 7V2" strokeLinecap="round" />
-    <path d="M11 7L7.5 3.5" strokeLinecap="round" />
-    <path d="M13 7l3.5-3.5" strokeLinecap="round" />
+// Symmetrical Golden Leaf Flourish SVG
+const LeafFlourish = ({ className = "w-7 h-4 text-[#c8a97e]" }) => (
+  <svg viewBox="0 0 36 18" fill="currentColor" className={className}>
+    <path
+      d="M2 11 C 12 10, 24 8, 34 5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M9 10 C 7 4, 15 2, 18 6 C 16 9, 11 10, 9 10 Z"
+      opacity="0.9"
+    />
+    <path
+      d="M21 8 C 19 2, 28 1, 30 5 C 27 8, 23 8, 21 8 Z"
+      opacity="0.9"
+    />
+    <path
+      d="M15 11 C 17 16, 25 15, 24 11 C 21 9, 17 10, 15 11 Z"
+      opacity="0.85"
+    />
+    <circle cx="19" cy="6" r="1.1" />
   </svg>
 );
 
-const CandleIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
-    <rect x="6" y="10" width="12" height="11" rx="2" />
-    <path d="M12 10V8" strokeLinecap="round" />
-    <path d="M12 3c-1 1.8-1.8 3-1.8 4.2a1.8 1.8 0 0 0 3.6 0C13.8 6 13 4.8 12 3Z" fill="currentColor" />
+// Clapperboard / Cinema Icon SVG
+const ClapperboardIcon = (props) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M20.2 6 3 11l-.9-3 17.2-5Z" />
+    <path d="m6.2 5.3 3.1 3.9" />
+    <path d="m12.4 3.4 3.1 4" />
+    <path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
+    <circle cx="7" cy="16" r="1" fill="currentColor" />
   </svg>
 );
 
-const LotusIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
-    <path d="M12 21c-1.8-3-1.8-6 0-9.5 1.8 3.5 1.8 6.5 0 9.5Z" />
-    <path d="M12 21c-3.5-1-5.5-3.5-5.5-6 0-1.8 1.5-2.5 3-1 1.5 1.5 2 4 2.5 7Z" />
-    <path d="M12 21c3.5-1 5.5-3.5 5.5-6 0-1.8-1.5-2.5-3-1-1.5 1.5-2 4-2.5 7Z" />
-    <path d="M7 21h10" strokeLinecap="round" />
-  </svg>
-);
-
-const QualityIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
-    <path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" strokeLinecap="round" />
-    <rect x="5" y="8" width="14" height="12" rx="3" />
-    <path d="M12 12v3" strokeLinecap="round" />
-    <circle cx="12" cy="15" r="1.5" fill="currentColor" />
-  </svg>
-);
-
-const BackgroundLeavesLeft = () => (
-  <svg viewBox="0 0 200 200" fill="none" className="w-full h-full text-[#d8bf9c] opacity-15">
-    <path d="M10 10 Q 70 60 110 180" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-    <path d="M30 25 Q 50 15 45 35 Q 35 45 30 25 Z" fill="currentColor" />
-    <path d="M50 45 Q 75 35 65 60 Q 50 65 50 45 Z" fill="currentColor" />
-    <path d="M70 70 Q 100 65 85 90 Q 70 95 70 70 Z" fill="currentColor" />
-    <path d="M85 105 Q 120 105 100 130 Q 85 130 85 105 Z" fill="currentColor" />
-  </svg>
-);
-
-const baseCollections = [
+// Curated Video Catalog matching the luxury reference design
+const videoCatalog = [
   {
     id: 1,
-    title: "Signature Candles",
-    subtitle: "SOY WAX & ESSENTIAL OILS",
-    description: "Crafted with care. Made to inspire.",
-    image: "/images/Collection/Collection_1.webp",
+    title: "The Art of Hand-Pouring",
+    subtitle: "Experience the timeless art of candle making.",
+    duration: "02:15",
+    views: "12.4K views",
+    date: "2 days ago",
+    thumbnail: "/images/our_products/the_flame_07.png",
     youtubeId: "vyWOHrolfrQ",
-    buttonBg: "bg-[#d8bf9c] text-[#761e27] hover:bg-[#faf8f5]",
-    icon: <CandleIcon />
   },
   {
     id: 2,
-    title: "Reed Diffusers",
-    subtitle: "CONTINUOUS ROOM FRAGRANCE",
-    description: "Effortless aroma. Everyday elegance.",
-    image: "/images/Collection/collectio_2.webp",
+    title: "Sandalwood & Cedar",
+    subtitle: "Relaxing ambient sounds to calm your mind and soul.",
+    duration: "01:48",
+    views: "18.7K views",
+    date: "5 days ago",
+    thumbnail: "/images/Collection/collectio_2.webp",
     youtubeId: "TYq2uy4B7qo",
-    buttonBg: "bg-white/20 text-white hover:bg-[#d8bf9c] hover:text-[#761e27] backdrop-blur-md border border-[#d8bf9c]/30",
-    icon: <DiffuserIcon />
   },
   {
     id: 3,
-    title: "Aroma Candles",
-    subtitle: "WARMTH & GLOW",
-    description: "Light. Relax. Unwind.",
-    image: "/images/Collection/collection_3.webp",
+    title: "Aromatherapy Benefits",
+    subtitle: "Discover the power of essential oils and natural fragrances.",
+    duration: "01:36",
+    views: "9.3K views",
+    date: "1 week ago",
+    thumbnail: "/images/Collection/collection_3.webp",
     youtubeId: "6_bUUXyzdVM",
-    buttonBg: "bg-white/20 text-white hover:bg-[#d8bf9c] hover:text-[#761e27] backdrop-blur-md border border-[#d8bf9c]/30",
-    icon: <CandleIcon />
   },
   {
     id: 4,
-    title: "Wellness Collection",
-    subtitle: "CALM & BALANCE",
-    description: "For your mind, body & soul.",
-    image: "/images/Collection/Collection_4.webp",
+    title: "Luxury Gift Unboxing",
+    subtitle: "Our sustainable packaging made for memorable moments.",
+    duration: "02:30",
+    views: "15.6K views",
+    date: "1 week ago",
+    thumbnail: "/images/Collection/Collection_4.webp",
     youtubeId: "GQJ2AAQHeCc",
-    buttonBg: "bg-[#d8bf9c] text-[#761e27] hover:bg-[#faf8f5]",
-    icon: <LotusIcon />
-  }
-];
-
-// Duplicate collections twice to get 8 panels for the 3D Octagon
-const collections = [...baseCollections, ...baseCollections];
-
-const features = [
-  {
-    icon: <Leaf className="w-5 h-5" />,
-    title: "Natural Ingredients",
-    subtitle: "Eco-friendly & safe"
   },
   {
-    icon: <QualityIcon />,
-    title: "Premium Quality",
-    subtitle: "Finest fragrance oils"
+    id: 5,
+    title: "Mindful Moments",
+    subtitle: "Transform your living space with calming candlelight.",
+    duration: "01:55",
+    views: "14.2K views",
+    date: "2 weeks ago",
+    thumbnail: "/images/our_products/the_flame_01.webp",
+    youtubeId: "vyWOHrolfrQ",
   },
   {
-    icon: <Heart className="w-5 h-5" />,
-    title: "Handcrafted",
-    subtitle: "Made with love"
+    id: 6,
+    title: "Double Wooden Wicks",
+    subtitle: "Crafting soothing crackling wicks from organic cedar.",
+    duration: "02:10",
+    views: "11.8K views",
+    date: "3 weeks ago",
+    thumbnail: "/images/our_products/the_flame_06.png",
+    youtubeId: "TYq2uy4B7qo",
   },
-  {
-    icon: <ShieldCheck className="w-5 h-5" />,
-    title: "Safe & Clean",
-    subtitle: "Non-toxic & cruelty free"
-  }
 ];
 
 export default function Collections() {
-  const [activeYoutubeId, setActiveYoutubeId] = useState(null);
-  const [rotationDegree, setRotationDegree] = useState(0);
-  const [windowWidth, setWindowWidth] = useState(0);
-  
-  const autoPlayTimerRef = useRef(null);
-  const startXRef = useRef(0);
-  const isDraggingRef = useRef(false);
-  const containerRef = useRef(null);
-  const isScrollingRef = useRef(false);
+  const [selectedVideo, setSelectedVideo] = useState(videoCatalog[0]);
+  const [activeVideo, setActiveVideo] = useState(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(4);
 
-  // Set up screen-resize updates to dynamically calculate 3D radius bounds
+  // Responsive calculation for visible items count in carousel
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    setWindowWidth(window.innerWidth);
-    const handleResize = () => setWindowWidth(window.innerWidth);
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setVisibleCount(2);
+      } else if (window.innerWidth < 1024) {
+        setVisibleCount(3);
+      } else {
+        setVisibleCount(4);
+      }
+    };
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Stepped Autoplay: rotates 45 degrees every 4 seconds
-  const startAutoPlay = () => {
-    stopAutoPlay();
-    autoPlayTimerRef.current = setInterval(() => {
-      setRotationDegree((prev) => prev - 45);
-    }, 4000);
-  };
+  const maxIndex = Math.max(0, videoCatalog.length - visibleCount);
 
-  const stopAutoPlay = () => {
-    if (autoPlayTimerRef.current) {
-      clearInterval(autoPlayTimerRef.current);
-      autoPlayTimerRef.current = null;
-    }
-  };
+  // Auto-scroll logic: Advances smoothly every 3.5s, pauses when hovered
+  const handleNext = useCallback(() => {
+    setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+  }, [maxIndex]);
+
+  const handlePrev = useCallback(() => {
+    setCurrentIndex((prev) => (prev <= 0 ? maxIndex : prev - 1));
+  }, [maxIndex]);
 
   useEffect(() => {
-    startAutoPlay();
-    return () => stopAutoPlay();
-  }, []);
+    if (isHovered) return;
+    const interval = setInterval(() => {
+      handleNext();
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [isHovered, handleNext]);
 
-  // Compute exact panel width and Z-axis depth based on viewport sizes (made wider/healthier)
-  let panelWidth = 430;
-  let panelHeight = 460;
-  if (windowWidth < 360) {
-    panelWidth = 240;
-    panelHeight = 300;
-  } else if (windowWidth < 768) {
-    panelWidth = 280;
-    panelHeight = 350;
-  }
-  const radius = Math.round(panelWidth * 1.2071);
-
-  // Determine which index (0-7) is facing forward
-  const normalizedDegree = ((rotationDegree % 360) + 360) % 360;
-  const activeIdx = Math.round((360 - normalizedDegree) / 45) % 8;
-
-  // Bind mouse-wheel scroll directly to the container to prevent passive warnings and lock 1-by-1 step scroll
+  // Lock scroll when video modal is open
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleWheel = (e) => {
-      e.preventDefault();
-      
-      // If scroll lock is active, ignore further wheel events
-      if (isScrollingRef.current) return;
-
-      isScrollingRef.current = true;
-      stopAutoPlay();
-
-      if (e.deltaY > 0) {
-        setRotationDegree((prev) => prev - 45);
-      } else {
-        setRotationDegree((prev) => prev + 45);
-      }
-
-      startAutoPlay();
-
-      // Release lock after transition animation (650ms)
-      setTimeout(() => {
-        isScrollingRef.current = false;
-      }, 650);
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setActiveVideo(null);
     };
-
-    container.addEventListener("wheel", handleWheel, { passive: false });
-    return () => {
-      if (container) {
-        container.removeEventListener("wheel", handleWheel);
-      }
-    };
-  }, []);
-
-  // Handle drag/swipe events for touch and desktop browsers
-  const handleTouchStart = (e) => {
-    startXRef.current = e.touches[0].clientX;
-    isDraggingRef.current = true;
-    stopAutoPlay();
-  };
-
-  const handleTouchMove = (e) => {
-    if (!isDraggingRef.current) return;
-    const diffX = e.touches[0].clientX - startXRef.current;
-    if (Math.abs(diffX) > 40) {
-      if (diffX > 0) {
-        setRotationDegree((prev) => prev + 45);
-      } else {
-        setRotationDegree((prev) => prev - 45);
-      }
-      isDraggingRef.current = false; // trigger once per swipe
-      startAutoPlay();
-    }
-  };
-
-  const handleMouseDown = (e) => {
-    startXRef.current = e.clientX;
-    isDraggingRef.current = true;
-    stopAutoPlay();
-  };
-
-  const handleMouseMove = (e) => {
-    if (!isDraggingRef.current) return;
-    const diffX = e.clientX - startXRef.current;
-    if (Math.abs(diffX) > 50) {
-      if (diffX > 0) {
-        setRotationDegree((prev) => prev + 45);
-      } else {
-        setRotationDegree((prev) => prev - 45);
-      }
-      isDraggingRef.current = false; // trigger once per drag
-      startAutoPlay();
-    }
-  };
-
-  const handleMouseUp = () => {
-    isDraggingRef.current = false;
-    startAutoPlay();
-  };
-
-  // Click handler: spins the cylinder to center the clicked side card, or launches video if already centered
-  const handleCardClick = (idx, youtubeId) => {
-    stopAutoPlay();
-    if (idx === activeIdx) {
-      setActiveYoutubeId(youtubeId);
+    if (activeVideo) {
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKeyDown);
     } else {
-      // Calculate shortest route to center target
-      const currentActiveAngle = -rotationDegree;
-      const targetAngle = idx * 45;
-      let diff = (targetAngle - (currentActiveAngle % 360) + 360) % 360;
-      if (diff > 180) diff -= 360;
-      setRotationDegree((prev) => prev - diff);
+      document.body.style.overflow = "unset";
     }
-    startAutoPlay();
-  };
+    return () => {
+      document.body.style.overflow = "unset";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [activeVideo]);
 
   return (
-    <section className="py-20 md:py-24 bg-[#faf8f5] relative z-10 overflow-hidden border-t border-[#d8bf9c]/25">
-      
-      {/* Background Decorative Illustrations */}
-      <div className="absolute top-4 left-0 w-48 h-48 md:w-80 md:h-80 select-none pointer-events-none z-0">
-        <BackgroundLeavesLeft />
-      </div>
-      <div className="absolute top-4 right-0 w-48 h-48 md:w-80 md:h-80 select-none pointer-events-none z-0 transform scale-x-[-1]">
-        <BackgroundLeavesLeft />
-      </div>
+    <section className="py-10 sm:py-12 md:py-14 bg-[#e6e2dc] text-[#121212] select-none relative overflow-hidden border-b border-[#d8cfc0]">
+      {/* Radiant warm luxury ambient background glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[350px] bg-[#d8bf9c]/20 rounded-full blur-[140px] pointer-events-none -z-10" />
+      <div className="absolute bottom-6 right-10 w-[450px] h-[450px] bg-[#761e27]/5 rounded-full blur-[120px] pointer-events-none -z-10" />
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+      <div className="max-w-6xl mx-auto px-6 sm:px-10 md:px-12 lg:px-14 relative z-10">
         
-        {/* Header Title Section - High-end Editorial Luxury Design */}
-        <div className="flex flex-col items-center justify-center text-center mb-10 md:mb-16">
-          {/* Small Brand Prefix */}
-          <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.35em] xs:tracking-[0.45em] text-[#d8bf9c] mb-3 leading-none">
-            THE TWIN FLAME EXPERIENCE
-          </span>
-
-          {/* Main Title */}
-          <h2 className="font-serif text-2xl xs:text-3xl sm:text-4xl md:text-[2.9rem] font-normal tracking-wide text-[#761e27] leading-tight">
-            <span className="italic font-serif text-[#b8986c] mr-1">Curated</span> Collections
+        {/* ========================================================================= */}
+        {/* SECTION HEADER                                                            */}
+        {/* ========================================================================= */}
+        <div className="flex flex-col items-center text-center mb-5 sm:mb-7">
+          {/* Main Title - Consistent with other components */}
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-normal text-[#181112] tracking-tight leading-tight">
+            Video <span className="italic font-serif text-[#761e27]">Gallery</span>
           </h2>
 
-          {/* Ornate Gold Divider */}
-          <div className="flex items-center justify-center gap-3.5 my-3 w-full">
-            <div className="h-[1px] w-14 bg-gradient-to-r from-transparent to-[#d8bf9c]/60" />
-            <div className="flex items-center gap-1.5 text-[#d8bf9c] text-[10px]">
-              <span>✦</span>
-              <span className="text-[12px] opacity-90 scale-110">✧</span>
-              <span>✦</span>
-            </div>
-            <div className="h-[1px] w-14 bg-gradient-to-l from-transparent to-[#d8bf9c]/60" />
+          {/* Ornate Gold Diamond Divider */}
+          <div className="flex items-center justify-center gap-3 my-2 sm:my-2.5">
+            <div className="h-[1px] w-12 sm:w-16 bg-gradient-to-r from-transparent to-[#c8a97e]" />
+            <span className="w-2 h-2 rotate-45 border border-[#c8a97e] bg-[#e6e2dc]" />
+            <div className="h-[1px] w-12 sm:w-16 bg-gradient-to-l from-transparent to-[#c8a97e]" />
           </div>
 
           {/* Subtitle */}
-          <p className="font-sans text-xs sm:text-sm tracking-wide text-[#761e27]/75 font-medium max-w-xl">
-            Discover fragrances tailor-made for each corner of your home, designed to evoke distinct memories and vibes.
+          <p className="font-sans text-xs sm:text-[13px] text-[#5c5652] max-w-xl font-normal tracking-wide leading-relaxed px-2">
+            Immerse yourself in our candle-making rituals, soothing ambient sounds, and the mindful artistry behind every hand-poured blend.
           </p>
         </div>
 
-        {/* 3D Viewport Wrapper */}
-        <div 
-          ref={containerRef}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleMouseUp}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          className="relative w-full h-[360px] md:h-[520px] flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing select-none"
-          style={{ perspective: "2000px" }}
-        >
-          {/* Left/Right Floating Manual Nav Controls */}
-          <button
-            onClick={() => { stopAutoPlay(); setRotationDegree((prev) => prev + 45); startAutoPlay(); }}
-            className="absolute left-3 md:left-6 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/70 border border-[#d8bf9c]/35 text-[#761e27] flex items-center justify-center hover:bg-[#761e27] hover:text-white transition-all duration-300 shadow-md active:scale-95 cursor-pointer z-50 text-lg md:text-xl font-serif"
-            aria-label="Previous Slide"
-          >
-            ‹
-          </button>
+        {/* ========================================================================= */}
+        {/* FEATURED HERO VIDEO CARD (CLEAR, VIBRANT - COMPACT LUXURY PROPORTIONS)   */}
+        {/* ========================================================================= */}
+        <div className="relative w-full aspect-[16/9.5] sm:aspect-[21/8.5] md:aspect-[2.4/1] min-h-[290px] sm:min-h-[340px] md:min-h-[380px] rounded-[22px] sm:rounded-[30px] overflow-hidden shadow-2xl border border-[#d8bf9c]/40 group/hero select-none mb-4 sm:mb-5 bg-zinc-950">
+          
+          {/* Crisp, Vibrant Featured Image (Full brightness, no dark shade) */}
+          <Image
+            src={selectedVideo.thumbnail}
+            alt={selectedVideo.title}
+            fill
+            priority
+            sizes="(max-width: 1280px) 100vw, 1200px"
+            className="object-cover object-center brightness-100 group-hover/hero:scale-102 transition-transform duration-700 ease-out"
+          />
 
-          <button
-            onClick={() => { stopAutoPlay(); setRotationDegree((prev) => prev - 45); startAutoPlay(); }}
-            className="absolute right-3 md:right-6 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/70 border border-[#d8bf9c]/35 text-[#761e27] flex items-center justify-center hover:bg-[#761e27] hover:text-white transition-all duration-300 shadow-md active:scale-95 cursor-pointer z-50 text-lg md:text-xl font-serif"
-            aria-label="Next Slide"
-          >
-            ›
-          </button>
-
-          {/* 3D Octagon Cylinder Container */}
-          <div
-            className="relative transition-transform duration-700 ease-out flex items-center justify-center transform-gpu"
-            style={{
-              width: `${panelWidth}px`,
-              height: `${panelHeight}px`,
-              transform: `rotateY(${rotationDegree}deg)`,
-              transformStyle: "preserve-3d",
-              WebkitTransformStyle: "preserve-3d"
-            }}
-          >
-            {collections.map((col, idx) => {
-              const angle = idx * 45;
-              const isActive = idx === activeIdx;
-
-              // Calculate spacing offset to fade out the back of the cylinder
-              const indexDiff = Math.abs(idx - activeIdx);
-              const wrapDiff = Math.min(indexDiff, 8 - indexDiff);
-
-              // Render: active is 100%, adjacent sides are 85% opacity, outer sides are 45% opacity (no scaling to prevent gaps)
-              let opacityClass = "opacity-0 pointer-events-none scale-100";
-              if (wrapDiff === 0) {
-                opacityClass = "opacity-100 scale-100 z-30";
-              } else if (wrapDiff === 1) {
-                opacityClass = "opacity-85 scale-100 z-20";
-              } else if (wrapDiff === 2) {
-                opacityClass = "opacity-45 scale-100 z-10 pointer-events-none";
-              } else {
-                opacityClass = "opacity-0 pointer-events-none z-0";
-              }
-
-              return (
-                <div
-                  key={`${col.id}-${idx}`}
-                  onClick={() => handleCardClick(idx, col.youtubeId)}
-                  style={{
-                    transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
-                    width: `${panelWidth}px`,
-                    height: `${panelHeight}px`,
-                    backfaceVisibility: "hidden",
-                    WebkitBackfaceVisibility: "hidden"
-                  }}
-                  className={`absolute inset-0 rounded-[20px] overflow-hidden group border border-[#d8bf9c]/35 hover:border-[#d8bf9c] shadow-lg cursor-pointer transform-gpu transition-all duration-[750ms] ease-out ${opacityClass}`}
-                >
-                  {/* 1. Background Placeholder Image (Using translateZ to prevent browser collapsing) */}
-                  <img
-                    src={col.image}
-                    alt={col.title}
-                    style={{ transform: "translateZ(1px)" }}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 z-0"
-                  />
-
-                  {/* 2. Youtube Video Loop Background (Only render on active card to prevent mirror bleed and browser lags) */}
-                  {isActive && (
-                    <div 
-                      style={{ transform: "translateZ(2px)" }}
-                      className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-10 bg-black/10"
-                    >
-                      <iframe
-                        src={`https://www.youtube.com/embed/${col.youtubeId}?autoplay=1&mute=1&loop=1&playlist=${col.youtubeId}&controls=0&showinfo=0&rel=0&playsinline=1&modestbranding=1&enablejsapi=1`}
-                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[200%] md:h-[240%] pointer-events-none scale-105 group-hover:scale-110 transition-transform duration-700 ease-out"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        frameBorder="0"
-                      ></iframe>
-                    </div>
-                  )}
-
-                  {/* 3. Inset Gold Border Frame (Double-Border Rectangle Shape with translateZ) */}
-                  <div 
-                    style={{ transform: "translateZ(3px)" }}
-                    className="absolute inset-3.5 border border-[#d8bf9c]/25 rounded-[14px] pointer-events-none z-20 transition-colors duration-300 group-hover:border-[#d8bf9c]/55" 
-                  />
-
-                  {/* Ambient gradient overlays */}
-                  <div style={{ transform: "translateZ(4px)" }} className="absolute inset-0 bg-black/15 group-hover:bg-black/10 transition-colors duration-500 z-5" />
-                  <div style={{ transform: "translateZ(5px)" }} className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/35 to-transparent z-5" />
-
-                  {/* 4. Card Content (Highest translateZ layer to prevent text/icon vanishing) */}
-                  <div style={{ transform: "translateZ(6px)" }} className="absolute inset-0 p-6 md:p-8 flex flex-col justify-between z-10">
-                    
-                    {/* Top Part: Icon Container */}
-                    <div>
-                      {col.icon && (
-                        <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white border border-white/10 shadow-md transform group-hover:scale-105 transition-transform duration-300">
-                          {col.icon}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Bottom Part: Texts and Action buttons */}
-                    <div className="space-y-3">
-                      <div>
-                        <span className="text-[9px] md:text-[10px] tracking-[0.2em] font-bold text-[#d8bf9c] uppercase block">
-                          {col.subtitle}
-                        </span>
-                        {/* Gold line separator */}
-                        <div className="w-10 h-[1.5px] bg-[#d8bf9c] mt-2 mb-3 transition-all duration-300 group-hover:w-16" />
-                        
-                        <h3 className="font-serif text-xl md:text-2xl font-bold tracking-wide text-white leading-tight">
-                          {col.title}
-                        </h3>
-                        
-                        <p className="font-sans text-[10px] md:text-xs text-zinc-300 font-light mt-1.5 leading-relaxed line-clamp-2 md:line-clamp-none">
-                          {col.description}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-1">
-                        {/* Explore Pill Button */}
-                        <div className={`rounded-full py-2 px-4.5 flex items-center gap-1.5 text-[9px] md:text-[10px] font-semibold tracking-wider transition-all duration-300 shadow-md transform group-hover:-translate-y-0.5 ${col.buttonBg}`}>
-                          <span>Explore</span>
-                          <ArrowRight className="w-3 h-3 transition-transform duration-300 group-hover:translate-x-1" />
-                        </div>
-
-                        {/* Circle Arrow Indicator */}
-                        <div className="w-8.5 h-8.5 rounded-full bg-black/40 border border-white/10 flex items-center justify-center text-white backdrop-blur-md transition-all duration-300 group-hover:bg-black/60 group-hover:scale-110">
-                          <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:rotate-45" />
-                        </div>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Mouse wheel / Swipe Help Guide */}
-        <div className="flex flex-col items-center justify-center gap-2 mt-4 text-center">
-          <div className="flex items-center gap-2 text-[#761e27]/80 text-[10px] md:text-xs font-bold tracking-[0.25em] uppercase select-none">
-            <RotateCw className="w-3.5 h-3.5 animate-spin-slow" />
-            <span>SCROLL MOUSEWHEEL OR SWIPE TO SPIN</span>
+          {/* Top-Right Duration Pill Badge */}
+          <div className="absolute top-3.5 right-3.5 sm:top-5 sm:right-5 z-20 flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white text-[10px] sm:text-[11px] font-sans font-medium shadow-md">
+            <Clock className="w-3 h-3 text-[#d8bf9c]" />
+            <span>{selectedVideo.duration}</span>
           </div>
 
-          {/* Indicator Pagination Dots */}
-          <div className="flex justify-center gap-2 mt-2">
-            {[...Array(8)].map((_, i) => (
-              <button
-                key={i}
-                onClick={() => handleCardClick(i, collections[i].youtubeId)}
-                className={`w-2 h-2 rounded-full cursor-pointer transition-all duration-300 ${
-                  i === activeIdx 
-                    ? "bg-[#761e27] scale-125" 
-                    : "bg-zinc-300 hover:bg-[#d8bf9c]"
-                }`}
-                aria-label={`Go to slide ${i + 1}`}
-              />
-            ))}
-          </div>
-        </div>
+          {/* Left Column: Frosted Glass Info Card for Perfect Legibility */}
+          <div className="absolute left-3.5 sm:left-7 md:left-9 lg:left-11 top-1/2 -translate-y-1/2 max-w-xs sm:max-w-sm md:max-w-md z-20 flex flex-col items-start text-left p-4 sm:p-5 lg:p-6 rounded-2xl sm:rounded-3xl bg-black/35 backdrop-blur-md border border-white/20 shadow-2xl">
+            <h3 className="font-serif text-xl sm:text-2.5xl lg:text-3.5xl font-normal text-white leading-[1.15] tracking-tight drop-shadow-sm">
+              {selectedVideo.title}
+            </h3>
 
-        {/* Bottom Feature Bar */}
-        <div className="mt-16 border-t border-[#d8bf9c]/25 pt-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4">
-            {features.map((feat, idx) => (
-              <div
-                key={idx}
-                className={`flex items-center gap-4 justify-start sm:justify-center px-4 transition-all duration-350 hover:translate-y-[-3px] group ${
-                  idx < 3 ? "lg:border-r lg:border-[#d8bf9c]/20" : ""
-                }`}
-              >
-                {/* Gold lined wine red circle icon wrapper */}
-                <div className="w-11 h-11 rounded-full bg-[#761e27] border border-[#d8bf9c]/35 flex items-center justify-center text-[#d8bf9c] shrink-0 shadow-md group-hover:scale-105 transition-transform duration-300">
-                  {feat.icon}
-                </div>
-                <div className="text-left">
-                  <h4 className="font-serif text-sm font-semibold text-[#761e27] tracking-wide">
-                    {feat.title}
-                  </h4>
-                  <p className="font-sans text-[11px] text-zinc-400 font-light mt-0.5 leading-tight">
-                    {feat.subtitle}
-                  </p>
-                </div>
+            {/* Inset Gold Divider with Diamond */}
+            <div className="flex items-center gap-2.5 my-3 sm:my-3.5">
+              <div className="h-[1px] w-7 sm:w-9 bg-[#c8a97e]/80" />
+              <span className="w-1.5 h-1.5 rotate-45 border border-[#c8a97e] bg-white/20" />
+              <div className="h-[1px] w-7 sm:w-9 bg-[#c8a97e]/80" />
+            </div>
+
+            <p className="font-sans text-xs sm:text-[13px] text-zinc-100 font-light leading-relaxed mb-5 sm:mb-6">
+              {selectedVideo.subtitle}
+            </p>
+
+            {/* Watch Video Oval Button */}
+            <button
+              onClick={() => setActiveVideo(selectedVideo)}
+              className="inline-flex items-center gap-2.5 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#64171f] hover:bg-[#761e27] border border-[#d8bf9c]/60 text-white font-serif text-xs sm:text-[13px] tracking-wide shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer group/btn"
+            >
+              <div className="w-5 h-5 rounded-full bg-white text-[#761e27] flex items-center justify-center shrink-0 shadow-xs group-hover/btn:scale-110 transition-transform">
+                <Play className="w-2.5 h-2.5 fill-current ml-0.5" />
               </div>
-            ))}
+              <span className="font-medium">Watch Video</span>
+            </button>
           </div>
+
+          {/* Center Large Glowing Concentric Play Button with Animated Continuous Moving Waves */}
+          <div
+            onClick={() => setActiveVideo(selectedVideo)}
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center cursor-pointer group/centerplay"
+            aria-label="Play Featured Video"
+          >
+            {/* Continuously Animated Expanding Wave Rings */}
+            <div className="hero-wave hero-wave-1" />
+            <div className="hero-wave hero-wave-2" />
+            <div className="hero-wave hero-wave-3" />
+
+            {/* Center Play Disc */}
+            <div className="relative z-10 w-15 h-15 sm:w-18 sm:h-18 md:w-20 md:h-20 rounded-full bg-white/95 text-[#761e27] shadow-[0_4px_35px_rgba(0,0,0,0.5)] flex items-center justify-center group-hover/centerplay:scale-110 group-hover/centerplay:bg-[#761e27] group-hover/centerplay:text-white transition-all duration-300">
+              <Play className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 fill-current ml-0.5 sm:ml-1 transition-colors" />
+            </div>
+          </div>
+
+        </div>
+
+        {/* ========================================================================= */}
+        {/* BOTTOM THUMBNAILS CAROUSEL (ALIGNED WITH HERO CARD, BUTTONS OUTSIDE)     */}
+        {/* ========================================================================= */}
+        <div 
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          className="relative w-full group/carousel"
+        >
+          {/* Left Arrow Button - Positioned completely OUTSIDE on the left margin */}
+          <button
+            onClick={handlePrev}
+            aria-label="Previous Videos"
+            className="absolute -left-4 sm:-left-6 md:-left-8 lg:-left-12 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full bg-white text-[#761e27] border border-[#ebdcd0] shadow-xl flex items-center justify-center transition-all duration-300 cursor-pointer hover:bg-[#761e27] hover:text-white hover:scale-110 z-30"
+          >
+            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
+
+          {/* Smooth Sliding Track Container - Full Width Aligned with Hero Card */}
+          <div className="overflow-hidden w-full py-1">
+            <div
+              className="flex transition-transform duration-700 ease-out -mx-1.5 sm:-mx-2"
+              style={{
+                transform: `translateX(-${currentIndex * (100 / visibleCount)}%)`,
+              }}
+            >
+              {videoCatalog.map((video) => {
+                const isSelected = video.id === selectedVideo.id;
+                return (
+                  <div
+                    key={video.id}
+                    style={{ width: `${100 / visibleCount}%` }}
+                    className="shrink-0 px-1.5 sm:px-2"
+                  >
+                    <div
+                      onClick={() => setSelectedVideo(video)}
+                      className={`relative aspect-[16/10] rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer group shadow-sm hover:shadow-xl transition-all duration-300 bg-zinc-900 ${
+                        isSelected
+                          ? "border-2 border-[#b8986c] ring-2 ring-[#b8986c]/40 scale-102"
+                          : "border border-black/10 hover:border-[#b8986c]/70"
+                      }`}
+                    >
+                      <Image
+                        src={video.thumbnail}
+                        alt={video.title}
+                        fill
+                        sizes="(max-width: 768px) 50vw, 25vw"
+                        className="object-cover object-center group-hover:scale-108 transition-transform duration-500 brightness-95"
+                      />
+                      
+                      {/* Subtle Dark Gradient at bottom only for text legibility */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
+
+                      {/* Top-Right Duration Badge */}
+                      <div className="absolute top-2 right-2 z-10 px-2 py-0.5 rounded-md bg-black/70 text-white text-[9.5px] font-sans font-medium">
+                        {video.duration}
+                      </div>
+
+                      {/* Bottom Row: Mini Play Button + Video Title */}
+                      <div className="absolute bottom-2.5 left-2.5 right-2.5 z-10 flex items-center gap-2">
+                        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white text-[#761e27] flex items-center justify-center shrink-0 shadow-xs group-hover:bg-[#761e27] group-hover:text-white transition-colors">
+                          <Play className="w-2.5 h-2.5 fill-current ml-0.5" />
+                        </div>
+                        <span className="font-serif text-[11px] sm:text-xs md:text-[12.5px] font-medium text-white truncate group-hover:text-[#d8bf9c] transition-colors text-left">
+                          {video.title}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Right Arrow Button - Positioned completely OUTSIDE on the right margin */}
+          <button
+            onClick={handleNext}
+            aria-label="Next Videos"
+            className="absolute -right-4 sm:-right-6 md:-right-8 lg:-right-12 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 md:w-11 md:h-11 rounded-full bg-white text-[#761e27] border border-[#ebdcd0] shadow-xl flex items-center justify-center transition-all duration-300 cursor-pointer hover:bg-[#761e27] hover:text-white hover:scale-110 z-30"
+          >
+            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
+        </div>
+
+        {/* Carousel Pagination Progress Dots */}
+        <div className="flex items-center justify-center gap-1.5 mt-3">
+          {Array.from({ length: maxIndex + 1 }).map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentIndex(idx)}
+              aria-label={`Go to slide ${idx + 1}`}
+              className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                currentIndex === idx
+                  ? "w-6 bg-[#761e27]"
+                  : "w-1.5 bg-[#d8bf9c]/60 hover:bg-[#b8986c]"
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* ========================================================================= */}
+        {/* BOTTOM ACTION: "Explore More Videos" BUTTON                               */}
+        {/* ========================================================================= */}
+        <div className="flex items-center justify-center mt-5 sm:mt-7">
+          {/* Wine Clapperboard Pill Button */}
+          <button
+            onClick={() => setActiveVideo(selectedVideo)}
+            className="px-6 sm:px-8 py-2.5 sm:py-3 rounded-full bg-[#64171f] hover:bg-[#761e27] text-white font-serif text-xs sm:text-[13px] tracking-wider flex items-center gap-2.5 shadow-xl border border-[#d8bf9c]/35 hover:scale-105 transition-all duration-300 cursor-pointer"
+          >
+            <ClapperboardIcon className="w-4 h-4 text-[#d8bf9c]" />
+            <span>Explore More Videos</span>
+          </button>
         </div>
 
       </div>
 
-      {/* Video Modal Popup playing YouTube Video (Shorts 9:16 aspect ratio) */}
+      {/* ========================================================================= */}
+      {/* FULLSCREEN POPUP CINEMA VIDEO PLAYER                                      */}
+      {/* ========================================================================= */}
       <AnimatePresence>
-        {activeYoutubeId && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex items-center justify-center p-4"
-            onClick={() => setActiveYoutubeId(null)}
-          >
-            {/* Close Button */}
-            <button
-              onClick={() => setActiveYoutubeId(null)}
-              className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10 cursor-pointer z-[110]"
-              aria-label="Close video"
-            >
-              <X className="w-6 h-6" />
-            </button>
-
-            {/* Video Frame */}
+        {activeVideo && (
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+            {/* Backdrop */}
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="h-[70vh] aspect-[9/16] max-w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative bg-black"
-              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setActiveVideo(null)}
+              className="fixed inset-0 bg-black/90 backdrop-blur-md"
+            />
+
+            {/* Modal Dialog */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.94, y: 20 }}
+              transition={{ type: "spring", damping: 26, stiffness: 320 }}
+              className="relative w-full max-w-3xl bg-[#140b0d] rounded-3xl overflow-hidden shadow-2xl border border-[#d8bf9c]/40 z-10 my-auto text-white"
             >
-              <iframe
-                width="100%"
-                height="100%"
-                src={`https://www.youtube.com/embed/${activeYoutubeId}?autoplay=1`}
-                title="Twin Flame Category Video"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                className="w-full h-full"
-              ></iframe>
+              {/* Close Button */}
+              <button
+                onClick={() => setActiveVideo(null)}
+                aria-label="Close cinema"
+                className="absolute top-4 right-4 z-30 w-9 h-9 rounded-full bg-black/60 hover:bg-white text-white hover:text-black border border-white/20 shadow-md flex items-center justify-center transition-all duration-200 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="relative aspect-video w-full bg-black">
+                <iframe
+                  src={`https://www.youtube.com/embed/${activeVideo.youtubeId}?autoplay=1&rel=0&playsinline=1&modestbranding=1`}
+                  title={activeVideo.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              <div className="p-5 sm:p-6 bg-gradient-to-b from-[#1a0e11] to-[#12080a]">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#d8bf9c] px-2.5 py-0.5 rounded-full bg-white/10">
+                    Twin Flame Ritual
+                  </span>
+                  <span className="text-xs text-zinc-400 font-sans">
+                    {activeVideo.duration} • {activeVideo.views}
+                  </span>
+                </div>
+                <h3 className="font-serif text-xl sm:text-2xl font-semibold text-white mb-2">
+                  {activeVideo.title}
+                </h3>
+                <p className="font-sans text-xs sm:text-[13px] text-zinc-300 font-light leading-relaxed">
+                  {activeVideo.subtitle} Handcrafted with 100% natural organic soy wax and crackling wooden wicks.
+                </p>
+              </div>
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </section>

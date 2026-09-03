@@ -53,39 +53,43 @@ const leftLinks = [
   },
   {
     name: "Shop",
-    href: "#",
+    href: "/collections",
     hasDropdown: true,
     dropdownItems: [
-      { name: "Luxury Candles", href: "#" },
-      { name: "Reed Diffusers", href: "#" },
-      { name: "Wax Melts", href: "#" },
-      { name: "New Arrivals", href: "#" }
+      { name: "Luxury Candles", href: "/collections?category=candles" },
+      { name: "Reed Diffusers", href: "/collections?category=diffusers" },
+      { name: "Wax Melts", href: "/collections?category=melts" },
+      { name: "Gift Sets & Hampers", href: "/collections?category=gift-sets" }
     ]
   },
   {
     name: "Gifts",
-    href: "#",
+    href: "/collections?category=gift-sets",
     hasDropdown: true,
     dropdownItems: [
-      { name: "Signature Series", href: "#" },
-      { name: "Aromatherapy", href: "#" },
-      { name: "Gilded Luxury", href: "#" },
-      { name: "Limited Edition", href: "#" }
+      { name: "Signature Series", href: "/collections?category=signature" },
+      { name: "Aromatherapy", href: "/collections?category=aromatherapy" },
+      { name: "Festive Rituals", href: "/collections?category=festive" },
+      { name: "Luxury Hampers", href: "/collections?category=gift-sets" }
     ]
+  },
+  {
+    name: "Wedding",
+    href: "/collections?category=gift-sets",
+    hasDropdown: false
   }
-  
 ];
 
 // Right Side Navigation Links Config
 const rightLinks = [
   {
     name: "About",
-    href: "#",
+    href: "/about",
     hasDropdown: false
   },
   {
     name: "Offers",
-    href: "#",
+    href: "/collections",
     hasDropdown: false
   },
   {
@@ -501,30 +505,39 @@ export default function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed top-0 left-0 w-full h-[180px] bg-white shadow-xl border-b border-zinc-100 z-[150] px-4 md:px-8 py-6 flex items-center justify-center"
+            className="fixed top-0 left-0 w-full h-[180px] bg-white shadow-xl border-b border-gold/15 z-[150] px-4 sm:px-6 md:px-8 py-6 flex items-center justify-center"
           >
-            <div className="w-full max-w-3xl relative">
-              <h4 className="text-[10px] tracking-[0.25em] text-zinc-400 uppercase font-semibold mb-3 text-center font-sans">
+            <div className="w-full max-w-3xl flex flex-col gap-3.5">
+              {/* Header Label */}
+              <h4 className="text-[10px] tracking-[0.25em] text-[#b8986c] uppercase font-semibold text-center font-sans">
                 Search Twin Flame Luxury Fragrances
               </h4>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="What scent are you searching for..."
-                  className="w-full bg-zinc-50 border border-zinc-200 rounded-full px-6 py-4 pr-12 font-sans text-sm focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold tracking-wide transition-colors"
-                  autoFocus
-                />
-                <button className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-gold transition-colors">
-                  <Search className="w-5 h-5" />
+              
+              {/* Symmetrical Row: Search Box + Close Button */}
+              <div className="w-full flex items-center gap-3">
+                {/* Search Input wrapper */}
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    placeholder="What scent are you searching for..."
+                    className="w-full bg-[#FAF7F2]/65 border border-gold/30 hover:border-gold/60 rounded-full px-5 py-3 pr-12 font-sans text-xs md:text-sm focus:outline-none focus:border-[#741F27] focus:ring-1 focus:ring-[#741F27]/30 text-luxury-black placeholder-neutral-400 tracking-wide transition-all duration-300"
+                    autoFocus
+                  />
+                  <button className="absolute right-4.5 top-1/2 -translate-y-1/2 text-luxury-gray hover:text-[#741F27] transition-colors">
+                    <Search className="w-4.5 h-4.5" />
+                  </button>
+                </div>
+                
+                {/* Close Button aligned side-by-side to prevent top header overlaps */}
+                <button
+                  onClick={() => setIsSearchOpen(false)}
+                  className="p-3 rounded-full bg-[#741F27] text-white hover:bg-gold hover:text-luxury-black transition-all duration-300 shadow-md flex items-center justify-center cursor-pointer shrink-0 hover:scale-105"
+                  aria-label="Close search"
+                >
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-              <button
-                onClick={() => setIsSearchOpen(false)}
-                className="absolute top-4 right-4 md:right-8 p-2 rounded-full bg-wine text-white hover:bg-gold hover:text-luxury-black transition-all duration-300 shadow-md flex items-center justify-center cursor-pointer"
-                aria-label="Close search"
-              >
-                <X className="w-4.5 h-4.5" />
-              </button>
+
             </div>
           </motion.div>
         )}
@@ -803,7 +816,7 @@ export default function Navbar() {
                 <div className="pt-6 border-t border-zinc-100 space-y-4 font-sans">
                   <div className="flex items-center gap-3 text-zinc-500 text-xs">
                     <MapPin className="w-4 h-4 text-wine flex-shrink-0" />
-                    <span>101 Fragrance Lane, New Delhi, India</span>
+                    <span>Boring Road, Patna, Bihar, India</span>
                   </div>
                   <div className="flex items-center gap-3 text-zinc-500 text-xs">
                     <Mail className="w-4 h-4 text-wine flex-shrink-0" />

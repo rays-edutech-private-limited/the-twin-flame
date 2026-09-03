@@ -52,7 +52,7 @@ export default function Topheader() {
   return (
     <div
       id="top-header"
-      className="w-full bg-[#0c0304] text-gold py-2 md:py-2.5 px-4 md:px-6 xl:px-8 text-[9px] md:text-[10px] xl:text-[11px] font-serif font-medium tracking-[0.16em] uppercase select-none z-[100] relative border-b border-gold/10 shadow-sm transition-all duration-300 transform-gpu origin-top"
+      className="w-full bg-[#0c0304] text-gold py-2 md:py-2.5 px-4 md:px-6 xl:px-8 text-[9px] md:text-[10px] xl:text-[11px] font-serif font-medium tracking-[0.16em] uppercase select-none z-[100] relative border-b border-gold/10 shadow-sm transition-all duration-300 transform-gpu origin-top overflow-hidden"
     >
       <div className="max-w-7xl mx-auto flex items-center justify-center">
         

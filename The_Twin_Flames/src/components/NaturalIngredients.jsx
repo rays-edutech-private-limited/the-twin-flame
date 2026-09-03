@@ -1,241 +1,188 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Sparkles, ArrowRight } from "lucide-react";
 
-// Mock collection panels data using actual paths from the our_products folder
-const panels = [
+// Curated 5 Lifestyle & Ritual categories matching the user's reference layout
+const ritualCategories = [
   {
     id: 1,
-    title: "Festive Spark",
-    desc: "Curated blends designed for special moments and celebrations. Elevate your holiday gatherings.",
-    bgImage: "/images/our_products/the_flame_01.webp",
-    thumbImage: "/images/our_products/bg_remove_02.png", // double candle transparent
-    tag: "FESTIVE COLLECTION",
-    btnText: "Explore Offers →",
-    href: "#offers"
+    title: "AROMATHERAPY",
+    image: "/images/our_products/the_flame_06.png",
+    tag: "Aroma Wellness",
+    link: "#aromatherapy",
   },
   {
     id: 2,
-    title: "Aroma Serenity",
-    desc: "Breathe in the botanical purity of wild lavender and golden sandalwood. Calms the mind and spirit.",
-    bgImage: "/images/our_products/the_flame_02.jpeg",
-    thumbImage: "/images/our_products/bg_remove_candle.png", // single candle transparent
-    tag: "SIGNATURE THERAPY",
-    btnText: "Discover Aromas →",
-    href: "#aromas"
+    title: "HYDRATION RITUALS",
+    image: "/images/our_products/the_flame_04.jpeg",
+    tag: "Mindful Living",
+    link: "#hydration-rituals",
   },
   {
     id: 3,
-    title: "Luxe Gifting",
-    desc: "Handcrafted hampers wrapped in custom gold foil cardboard. Perfect for the people you cherish.",
-    bgImage: "/images/our_products/the_flame_03.jpeg",
-    thumbImage: "/images/our_products/bg_remove_02.png", // double candle transparent
-    tag: "LUXURY GIFT SETS",
-    btnText: "Find Gifts →",
-    href: "#gifting"
+    title: "HOSTING ESSENTIALS",
+    image: "/images/our_products/the_flame_07.png",
+    tag: "Entertaining",
+    link: "#hosting-essentials",
   },
   {
     id: 4,
-    title: "Organic Soy",
-    desc: "100% plant-based soy wax paired with organic cotton wicks for a soot-free, eco-friendly aroma.",
-    bgImage: "/images/our_products/the_flame_04.jpeg",
-    thumbImage: "/images/our_products/bg_remove_candle.png", // single candle transparent
-    tag: "100% ORGANIC PURE",
-    btnText: "Shop Organic →",
-    href: "#organic"
+    title: "FUNCTIONAL DECOR",
+    image: "/images/our_products/the_flame_02.jpeg",
+    tag: "Artisan Wax",
+    link: "#functional-decor",
   },
   {
     id: 5,
-    title: "Pure Wellness",
-    desc: "Hand-poured wellness essentials crafted to purify and calm your sanctuaries.",
-    bgImage: "/images/our_products/the_flame_05.jpeg",
-    thumbImage: "/images/our_products/bg_remove_candle.png", // single candle transparent
-    tag: "WELLNESS ESSENTIALS",
-    btnText: "Explore Wellness →",
-    href: "#wellness"
-  }
+    title: "GIFT CARD",
+    image: "/images/our_products/the_flame_01.webp",
+    tag: "Luxury Gifting",
+    link: "#gifting",
+  },
 ];
 
 export default function NaturalIngredients() {
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  const handlePrev = () => {
-    setActiveIndex((prev) => (prev > 0 ? prev - 1 : panels.length - 1));
-  };
-
-  const handleNext = () => {
-    setActiveIndex((prev) => (prev < panels.length - 1 ? prev + 1 : 0));
-  };
-
   return (
-    <section className="py-16 md:py-24 bg-[#faf8f5] overflow-hidden select-none relative z-10 border-t border-[#d8bf9c]/25">
-      
-      {/* Subtle Background Decorative SVG Floral line art */}
-      <div className="absolute right-[-5%] bottom-[-5%] w-[320px] h-[420px] md:w-[550px] md:h-[700px] opacity-15 pointer-events-none select-none z-0">
-        <svg
-          className="w-full h-full text-[#d8bf9c]"
-          viewBox="0 0 100 150"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="0.35"
+    <section className="py-16 sm:py-20 md:py-24 bg-[#faf8f5] text-[#121212] select-none relative overflow-hidden border-b border-[#e8dfd5]">
+      {/* Radiant warm luxury ambient background glows */}
+      <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-[#d8bf9c]/15 rounded-full blur-[110px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#f5e6d3]/60 rounded-full blur-[100px] pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-10 lg:px-12 relative z-10">
+        {/* Section Header with Smooth Entrance Animation */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.6 }}
+          className="flex flex-col items-center text-center mb-10 sm:mb-14"
         >
-          <path d="M100,150 C85,120 70,80 85,30 C75,45 60,60 45,75 C30,90 15,100 0,110" />
-          <circle cx="85" cy="30" r="3" />
-          <path d="M85,25 C88,20 93,25 85,30" />
-          <path d="M85,35 C82,40 77,35 85,30" />
-          <path d="M80,30 C75,32 77,27 85,30" />
-          <path d="M90,30 C95,28 93,33 85,30" />
-          <circle cx="45" cy="75" r="4" />
-          <path d="M45,69 C49,63 54,67 45,75" />
-          <path d="M45,81 C41,87 36,83 45,75" />
-          <path d="M39,75 C33,78 35,71 45,75" />
-          <path d="M51,75 C57,72 55,79 45,75" />
-        </svg>
-      </div>
+          {/* Main Title in Luxury Serif */}
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-normal text-[#181112] tracking-tight leading-tight">
+            Curated For <span className="italic font-serif text-[#761e27]">Every Space</span>
+          </h2>
 
-      <div className="absolute left-[-5%] top-[-5%] w-[320px] h-[420px] opacity-10 pointer-events-none select-none z-0 rotate-180">
-        <svg
-          className="w-full h-full text-[#d8bf9c]"
-          viewBox="0 0 100 150"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="0.35"
-        >
-          <path d="M100,150 C85,120 70,80 85,30 C75,45 60,60 45,75 C30,90 15,100 0,110" />
-          <circle cx="85" cy="30" r="3" />
-        </svg>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
-        
-        {/* Header Block (Responsive margins and fonts) */}
-        <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6 mb-10 md:mb-16">
-          <div className="flex flex-col items-center md:items-start text-center md:text-left">
-            {/* Small Brand Prefix */}
-            <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.35em] xs:tracking-[0.45em] text-[#d8bf9c] mb-3 leading-none">
-              CELEBRATE WITH SOMETHING SPECIAL
-            </span>
-
-            {/* Main Title with italic accent */}
-            <h2 className="font-serif text-2xl xs:text-3xl sm:text-4xl md:text-[2.9rem] font-normal tracking-wide text-[#761e27] leading-tight">
-              Celebrate With <span className="italic font-serif text-[#b8986c] mr-1">Something</span> Special
-            </h2>
-
-            {/* Subtitle */}
-            <p className="font-sans text-xs sm:text-sm tracking-wide text-[#761e27]/80 mt-3 font-medium max-w-xl">
-              Seasonal moments deserve thoughtful details. Explore our curated offers and gifting picks...
-            </p>
+          {/* Gold Decorative Accent */}
+          <div className="flex items-center justify-center gap-3 my-3">
+            <div className="h-[1px] w-12 bg-gradient-to-r from-transparent to-[#d8bf9c]" />
+            <span className="text-[#b8986c] text-[11px]">✦</span>
+            <div className="h-[1px] w-12 bg-gradient-to-l from-transparent to-[#d8bf9c]" />
           </div>
 
-          {/* Navigation Controls */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handlePrev}
-              className="w-9 h-9 md:w-10 md:h-10 rounded-full border border-[#761e27]/30 flex items-center justify-center text-[#761e27] bg-transparent hover:bg-[#761e27] hover:text-white transition-all duration-300 cursor-pointer active:scale-95 text-sm md:text-base"
-              aria-label="Previous Slide"
-            >
-              ‹
-            </button>
-            <button
-              onClick={handleNext}
-              className="w-9 h-9 md:w-10 md:h-10 rounded-full border border-[#761e27]/30 flex items-center justify-center text-[#761e27] bg-transparent hover:bg-[#761e27] hover:text-white transition-all duration-300 cursor-pointer active:scale-95 text-sm md:text-base"
-              aria-label="Next Slide"
-            >
-              ›
-            </button>
-          </div>
-        </div>
+          {/* Subtitle */}
+          <p className="font-sans text-xs sm:text-sm text-zinc-500 max-w-xl font-normal tracking-wide">
+            Explore bespoke categories designed to bring harmony, warmth, and sensory tranquility to every moment.
+          </p>
+        </motion.div>
 
-        {/* 3D Accordion Slider Track (slower transition open timing, expanded mobile height to prevent clipping) */}
-        <div className="w-full flex flex-col md:flex-row gap-4 md:gap-5 items-stretch justify-center relative min-h-[560px] md:min-h-[480px]">
-          {panels.map((panel, idx) => {
-            const isActive = idx === activeIndex;
-
-            return (
-              <div
-                key={panel.id}
-                onClick={() => setActiveIndex(idx)}
-                onMouseEnter={() => setActiveIndex(idx)}
-                className={`group relative rounded-[28px] overflow-hidden cursor-pointer transition-all duration-[1250ms] cubic-bezier(0.16, 1, 0.3, 1) transform-gpu ${
-                  isActive
-                    ? "flex-[4.5] md:flex-[4] lg:flex-[3.5] min-w-[260px] xs:min-w-[280px] md:min-w-[460px] border-2 border-[#d8bf9c] shadow-2xl scale-[1.01] -translate-y-0.5 md:-translate-y-1"
-                    : "flex-[1] md:flex-[0.7] lg:flex-[0.6] min-w-[50px] md:min-w-[80px] border border-[#761e27]/10 hover:border-[#d8bf9c]/40 opacity-90 hover:opacity-100"
-                }`}
-              >
-                {/* A. Background Image (Always visible on all panels) */}
-                <Image
-                  src={panel.bgImage}
-                  alt={panel.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 600px"
-                  className={`object-cover transition-all duration-1000 ease-out transform group-hover:scale-106 ${
-                    isActive ? "brightness-95" : "brightness-[0.35]"
-                  }`}
-                />
-
-                {/* B. Soft Wine-Red Tint Overlay for Collapsed Cards */}
-                {!isActive && (
-                  <div className="absolute inset-0 bg-[#761e27]/50 group-hover:bg-[#761e27]/35 transition-colors duration-500 z-10" />
-                )}
-
-                {/* C. Dynamic Overlay Content */}
-                {isActive ? (
-                  /* Expanded Active Panel Content: Bottom-Right aligned Text content */
-                  <div className="absolute inset-0 z-20 flex flex-row items-end justify-end p-5 xs:p-6 md:p-8 gap-4 w-full h-full bg-black/15">
-                    
-                    {/* Right Side: Wine-Red Glassmorphism Text Card (w-full on mobile, bounded max-w for small S screens) */}
-                    <div className="flex flex-col justify-center items-start text-left p-4 xs:p-5 md:p-6 bg-[#761e27]/90 backdrop-blur-md border border-[#d8bf9c]/45 rounded-2xl w-full max-w-[250px] xs:max-w-[280px] md:max-w-[290px] gap-2 md:gap-2.5 shadow-lg animate-fadeIn z-20">
-                      <span className="text-[7px] md:text-[8px] font-bold tracking-[0.25em] text-[#d8bf9c] uppercase">
-                        {panel.tag}
-                      </span>
-                      <h3 className="font-serif text-lg xs:text-xl md:text-2xl font-bold text-white tracking-wide leading-none">
-                        {panel.title}
-                      </h3>
-                      <p className="font-sans text-[10px] xs:text-[11px] md:text-xs text-white/90 leading-relaxed font-light">
-                        {panel.desc}
-                      </p>
-                      <a
-                        href={panel.href}
-                        className="mt-1 px-3.5 py-2 rounded-full bg-[#d8bf9c] hover:bg-[#fbf9f6] text-[#761e27] hover:scale-103 font-bold text-[8px] md:text-[8.5px] tracking-wider uppercase transition-all duration-300"
-                      >
-                        {panel.btnText}
-                      </a>
-                    </div>
-
-                  </div>
-                ) : (
-                  /* Collapsed Inactive Panel Content: Vertical title on Desktop, Horizontal on Mobile to prevent clipping */
-                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-2 xs:p-3 bg-black/5">
-                    <span 
-                      className="font-serif font-bold text-xs xs:text-[13px] md:text-[16px] tracking-[0.15em] text-[#d8bf9c] uppercase whitespace-nowrap md:[writing-mode:vertical-rl] md:rotate-180 text-center"
-                    >
-                      {panel.title}
-                    </span>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Navigation Pagination Dots */}
-        <div className="flex justify-center gap-2.5 mt-8">
-          {panels.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveIndex(i)}
-              className={`w-2.5 h-2.5 rounded-full cursor-pointer transition-all duration-300 ${
-                i === activeIndex 
-                  ? "bg-[#761e27] scale-125" 
-                  : "bg-zinc-300 hover:bg-zinc-400"
-              }`}
-              aria-label={`Go to slide ${i + 1}`}
+        {/* ========================================================================= */}
+        {/* 5-CARD BRIGHT BENTO MASONRY GRID WITH ENTRANCE ANIMATIONS                 */}
+        {/* ========================================================================= */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5 sm:gap-6">
+          {/* Column 1: Top Left & Bottom Left (Span 4) */}
+          <div className="lg:col-span-4 flex flex-col gap-5 sm:gap-6">
+            {/* Card 1: AROMATHERAPY */}
+            <BentoCard
+              item={ritualCategories[0]}
+              heightClass="h-[250px] sm:h-[270px] md:h-[280px]"
+              delay={0.1}
             />
-          ))}
-        </div>
+            {/* Card 2: HYDRATION RITUALS */}
+            <BentoCard
+              item={ritualCategories[1]}
+              heightClass="h-[250px] sm:h-[270px] md:h-[280px]"
+              delay={0.2}
+            />
+          </div>
 
+          {/* Column 2: Top Middle & Bottom Middle (Span 4) */}
+          <div className="lg:col-span-4 flex flex-col gap-5 sm:gap-6">
+            {/* Card 3: HOSTING ESSENTIALS */}
+            <BentoCard
+              item={ritualCategories[2]}
+              heightClass="h-[250px] sm:h-[270px] md:h-[280px]"
+              delay={0.3}
+            />
+            {/* Card 4: FUNCTIONAL DECOR */}
+            <BentoCard
+              item={ritualCategories[3]}
+              heightClass="h-[250px] sm:h-[270px] md:h-[280px]"
+              delay={0.4}
+            />
+          </div>
+
+          {/* Column 3: Full-Height Tall Card (Span 4) */}
+          <div className="lg:col-span-4 md:col-span-2 lg:h-auto">
+            {/* Card 5: GIFT CARD (Tall Card) */}
+            <BentoCard
+              item={ritualCategories[4]}
+              heightClass="h-[280px] sm:h-[320px] md:h-[360px] lg:h-[584px]"
+              delay={0.5}
+            />
+          </div>
+        </div>
       </div>
     </section>
+  );
+}
+
+// Individual Bento Card Component: Bright, Natural & Animated with smooth hover zoom
+function BentoCard({ item, heightClass, delay = 0 }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
+      className="w-full h-full"
+    >
+      <Link
+        href={item.link}
+        className={`group relative w-full ${heightClass} rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer shadow-sm hover:shadow-2xl transition-all duration-500 border border-[#e5d8c8] hover:border-[#b8986c] transform-gpu block`}
+      >
+        {/* Bright, Crystal-Clear Lifestyle Image with Smooth Zoom */}
+        <Image
+          src={item.image}
+          alt={item.title}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className="object-cover object-center group-hover:scale-108 transition-transform duration-700 ease-out brightness-100 contrast-[1.02]"
+        />
+
+        {/* Minimal Subtle Bottom Warmth Gradient (Behind text only - No heavy dark shade on photo) */}
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/55 via-black/20 to-transparent pointer-events-none" />
+
+        {/* Top Floating Mini Badge */}
+        <div className="absolute top-3.5 left-3.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <span className="px-2.5 py-0.5 rounded-full bg-white/95 text-[#761e27] text-[8.5px] font-bold tracking-[0.2em] uppercase backdrop-blur-xs shadow-xs border border-[#e5d8c8]/60">
+            {item.tag}
+          </span>
+        </div>
+
+        {/* Bottom Content Area */}
+        <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 z-10 flex flex-col justify-end">
+          {/* Title in Bright Pure White Typography matching Reference */}
+          <h3 className="font-serif text-base sm:text-lg md:text-xl font-bold tracking-[0.16em] sm:tracking-[0.2em] text-white uppercase leading-snug drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)] group-hover:text-[#f8eddc] transition-colors">
+            {item.title}
+          </h3>
+
+          {/* Hover "Explore" Pill Button */}
+          <div className="mt-2.5 flex items-center justify-between opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 ease-out">
+            <span className="px-3.5 py-1.5 rounded-full bg-white/95 group-hover:bg-[#761e27] text-[#761e27] group-hover:text-white font-sans text-[9px] sm:text-[10px] font-bold tracking-[0.2em] uppercase flex items-center gap-1.5 shadow-md backdrop-blur-xs transition-colors duration-300">
+              <span>Explore</span>
+              <ArrowRight className="w-3 h-3" />
+            </span>
+
+            <span className="text-[10px] text-white font-medium tracking-wide drop-shadow-sm hidden sm:inline">
+              Shop ritual
+            </span>
+          </div>
+        </div>
+      </Link>
+    </motion.div>
   );
 }
